@@ -1,0 +1,12 @@
+{
+  "name": "design-olda",
+  "version": "1.0.0",
+  "private": true,
+  "description": "OLDA — Catalogue Design 2025 : catalogue virtuel des logos Saint-Martin",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
