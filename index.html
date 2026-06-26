@@ -21,42 +21,19 @@
 
 <!-- ░░ NAV ░░ -->
 <header class="nav" id="nav">
-  <a class="nav__brand" href="#top" aria-label="OLDA — accueil">
-    <span class="nav__mark">O</span>
-    <span class="nav__word">OLDA</span>
-  </a>
-  <nav class="nav__links" aria-label="Univers">
-    <a href="#catalogue" data-fam="Logos">Logos</a>
-    <a href="#catalogue" data-fam="Textile">Textile</a>
-    <a href="#catalogue" data-fam="Objets">Objets</a>
-  </nav>
-  <button class="nav__search-btn" id="navSearch" aria-label="Rechercher un logo">
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    <span>Rechercher</span>
-  </button>
+  <div class="toolbar__seg" id="families" role="tablist" aria-label="Univers"></div>
+  <div class="toolbar__search nav__search">
+    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Rechercher une référence…" autocomplete="off" spellcheck="false" aria-label="Rechercher une référence" />
+    <button id="searchClear" class="toolbar__clear" aria-label="Effacer" hidden>&times;</button>
+  </div>
 </header>
 
 <main id="top">
 
-  <!-- ░░ HERO ░░ -->
+  <!-- ░░ HERO (bande marquee) ░░ -->
   <section class="hero">
     <div class="hero__glow" aria-hidden="true"></div>
-    <div class="hero__inner">
-      <p class="hero__eyebrow reveal">Saint-Martin · French West Indies</p>
-      <h1 class="hero__title">
-        <span class="reveal" style="--d:1">Le catalogue</span>
-        <span class="reveal serif-i" style="--d:2">des logos <em>OLDA</em>.</span>
-      </h1>
-      <p class="hero__lede reveal" style="--d:3">
-        Notre collection complète de visuels signature — de la sérigraphie textile
-        aux objets souvenirs. Conçus, dessinés et imprimés sur l'île.
-      </p>
-      <a class="hero__cta reveal" style="--d:4" href="#catalogue">
-        Explorer le catalogue
-        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </a>
-    </div>
-    <!-- marquee -->
     <div class="marquee reveal" style="--d:6" aria-hidden="true">
       <div class="marquee__track" id="marquee"></div>
     </div>
@@ -64,14 +41,6 @@
 
   <!-- ░░ FILTERS + CATALOG ░░ -->
   <section class="catalogue" id="catalogue">
-    <div class="toolbar" id="toolbar">
-      <div class="toolbar__seg" id="families" role="tablist" aria-label="Univers"></div>
-      <div class="toolbar__search">
-        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input id="search" type="search" placeholder="Rechercher une référence…" autocomplete="off" spellcheck="false" aria-label="Rechercher une référence" />
-        <button id="searchClear" class="toolbar__clear" aria-label="Effacer" hidden>&times;</button>
-      </div>
-    </div>
     <div class="toolbar__count" id="count" aria-live="polite"></div>
 
     <div id="sections" class="sections"></div>
