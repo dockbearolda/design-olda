@@ -127,12 +127,9 @@ img{ display:block; max-width:100%; }
   max-width:36ch; font-size:clamp(17px,2.1vw,21px);
   color:var(--ink-soft); line-height:1.5;
 }
-.hero__stats{ display:flex; gap:clamp(28px,5vw,64px); margin:48px 0 40px; }
-.stat{ display:flex; flex-direction:column; }
-.stat__num{ font-family:var(--ff-display); font-weight:400; font-size:clamp(34px,5vw,56px); line-height:1; letter-spacing:-.02em; }
-.stat__lab{ font-size:13px; letter-spacing:.04em; color:var(--ink-mute); margin-top:8px; text-transform:lowercase; }
 .hero__cta{
   display:inline-flex; align-items:center; gap:10px;
+  margin-top:clamp(40px,6vw,56px);
   padding:15px 26px; border-radius:999px;
   background:var(--ink); color:var(--paper); font-size:15px; font-weight:500;
   transition:transform .3s var(--ease), background .3s, box-shadow .3s;

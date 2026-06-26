@@ -193,9 +193,6 @@ function wireUI(){
     if (e.key === "ArrowLeft") stepLB(-1);
     if (e.key === "ArrowRight") stepLB(1);
   });
-
-  // compteur stats animé (hero)
-  countUp();
 }
 function toggleClear(){ $("#searchClear").hidden = !$("#search").value; }
 
@@ -208,20 +205,6 @@ function revealObserver(){
     }, { rootMargin: "0px 0px -8% 0px", threshold: .05 });
   }
   $$(".reveal:not(.in)").forEach(n => io.observe(n));
-}
-
-/* ─────────── compteurs hero ─────────── */
-function countUp(){
-  $$(".stat__num").forEach(n => {
-    const target = +n.dataset.count; const dur = 1100; const t0 = performance.now();
-    const tick = (now) => {
-      const p = Math.min((now - t0) / dur, 1);
-      const e = 1 - Math.pow(1 - p, 3);
-      n.textContent = Math.round(target * e);
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
 }
 
 /* ─────────── utils ─────────── */
