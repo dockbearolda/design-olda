@@ -12,9 +12,9 @@
   --ink-mute: #8A8378;
   --line:     #E2DACE;
   --line-2:   #D6CCBC;
-  --sea:      #0D6E63;   /* accent océan */
-  --sea-deep: #0A554C;
-  --sea-soft: #E3EEEB;
+  --sea:      #1E8AD0;   /* accent bleu clair / océan */
+  --sea-deep: #1568A4;
+  --sea-soft: #E4F1FB;
   --sand:     #B89B72;
   --shadow:   28px 28px 60px -28px rgba(40,34,22,.22);
   --shadow-sm:12px 14px 30px -18px rgba(40,34,22,.28);
@@ -105,7 +105,7 @@ img{ display:block; max-width:100%; }
 .hero__glow{
   position:absolute; top:-30%; left:50%; transform:translateX(-50%);
   width:min(1100px,120vw); height:760px; pointer-events:none;
-  background:radial-gradient(50% 50% at 50% 50%, rgba(13,110,99,.16), transparent 70%);
+  background:radial-gradient(50% 50% at 50% 50%, rgba(30,138,208,.20), transparent 70%);
   filter:blur(10px);
 }
 .hero__inner{ position:relative; max-width:var(--maxw); margin:0 auto; padding:0 var(--gut); }
