@@ -166,16 +166,6 @@ function wireUI(){
     t = setTimeout(() => { query = search.value; toggleClear(); render(); }, 120);
   });
   $("#searchClear").addEventListener("click", () => { search.value = ""; query = ""; toggleClear(); render(); search.focus(); });
-  $("#navSearch").addEventListener("click", () => {
-    $("#catalogue").scrollIntoView({ behavior: "smooth" });
-    setTimeout(() => search.focus(), 500);
-  });
-
-  // liens univers (nav)
-  $$(".nav__links a").forEach(a => a.addEventListener("click", () => {
-    activeFamily = a.dataset.fam; query = ""; search.value = ""; toggleClear();
-    syncFamilies(); render();
-  }));
 
   // lightbox
   $("#lbClose").addEventListener("click", closeLB);
