@@ -9,12 +9,14 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
 const thumb = img => THUMB + img.replace(/\.png$/, ".webp");
 
+const HIDDEN_FAMILIES = new Set(["Textile"]); // gérés sur une autre app
 let DATA = null;
-let activeFamily = "Tout";
+let activeCat = "Tout";   // "Tout" ou un id de catégorie (famille d'objet)
 let query = "";
 let flat = [];          // liste plate {ref, img, cat} pour la navigation lightbox
 let lbList = [];        // sous-ensemble courant pour prev/next
 let lbIndex = 0;
+const visibleCats = () => DATA.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
 
 /* ─────────── boot ─────────── */
 init();
@@ -26,9 +28,9 @@ async function init(){
     $("#sections").innerHTML = "<p class='empty'>Catalogue indisponible.</p>";
     return;
   }
-  flat = DATA.categories.flatMap(c => c.items.map(i => ({ ...i, cat: c.title, family: c.family })));
+  flat = visibleCats().flatMap(c => c.items.map(i => ({ ...i, cat: c.title, family: c.family })));
   buildMarquee();
-  buildFamilies();
+  buildSidebar();
   render();
   wireUI();
   revealObserver();
@@ -49,23 +51,41 @@ function buildMarquee(){
   $("#marquee").appendChild(frag);
 }
 
-/* ─────────── filtres univers ─────────── */
-function buildFamilies(){
-  const counts = { Tout: flat.length };
-  DATA.families.forEach(f => counts[f] = flat.filter(i => i.family === f).length);
-  const order = ["Tout", ...DATA.families];
-  const wrap = $("#families");
-  order.forEach((f, i) => {
-    const b = el("button", "seg-btn", `${f}<span class="seg-btn__n">${counts[f]}</span>`);
-    b.setAttribute("role", "tab");
-    b.setAttribute("aria-selected", f === activeFamily ? "true" : "false");
-    b.dataset.fam = f;
-    b.addEventListener("click", () => { activeFamily = f; query = ""; $("#search").value = ""; toggleClear(); syncFamilies(); render(); });
-    wrap.appendChild(b);
+/* ─────────── sidebar — familles d'objet ─────────── */
+function buildSidebar(){
+  const side = $("#side");
+  side.innerHTML = "";
+  const cats = visibleCats();
+
+  // entrée « Tout »
+  side.appendChild(sideLink("Tout", "Tout le catalogue", flat.length));
+
+  // groupes par famille (Logos, Objets…), dans l'ordre d'apparition
+  const fams = [...new Set(cats.map(c => c.family))];
+  fams.forEach(fam => {
+    const group = el("div", "side__group");
+    group.appendChild(el("p", "side__label", fam));
+    cats.filter(c => c.family === fam).forEach(c => {
+      group.appendChild(sideLink(c.id, c.title, c.items.length));
+    });
+    side.appendChild(group);
   });
+  syncSidebar();
 }
-function syncFamilies(){
-  $$("#families .seg-btn").forEach(b => b.setAttribute("aria-selected", b.dataset.fam === activeFamily ? "true" : "false"));
+function sideLink(id, title, n){
+  const b = el("button", "side__item",
+    `<span class="side__name">${esc(title)}</span><span class="side__n">${n}</span>`);
+  b.dataset.cat = id;
+  b.addEventListener("click", () => {
+    activeCat = id; query = ""; $("#search").value = ""; toggleClear();
+    syncSidebar(); render(); closeDrawer();
+    $("#top").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  return b;
+}
+function syncSidebar(){
+  $$("#side .side__item").forEach(b =>
+    b.setAttribute("aria-current", b.dataset.cat === activeCat ? "true" : "false"));
 }
 
 /* ─────────── rendu catalogue ─────────── */
@@ -92,11 +112,11 @@ function render(){
   }
 
   $("#empty").hidden = true;
-  const cats = DATA.categories.filter(c => activeFamily === "Tout" || c.family === activeFamily);
+  const cats = activeCat === "Tout" ? visibleCats() : visibleCats().filter(c => c.id === activeCat);
   lbList = cats.flatMap(c => c.items.map(i => ({ ...i, cat: c.title })));
   cats.forEach(c => sections.appendChild(gridSection(c)));
   const tot = lbList.length;
-  $("#count").textContent = `${tot} logos · ${cats.length} collection${cats.length > 1 ? "s" : ""}`;
+  $("#count").textContent = `${tot} logos · ${cats.length} famille${cats.length > 1 ? "s" : ""}`;
   revealObserver();
 }
 
@@ -158,6 +178,12 @@ function wireUI(){
   const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 12);
   onScroll(); addEventListener("scroll", onScroll, { passive: true });
 
+  // tiroir sidebar (mobile)
+  $("#navToggle").addEventListener("click", () =>
+    document.body.classList.contains("drawer-open") ? closeDrawer() : openDrawer());
+  $("#scrim").addEventListener("click", closeDrawer);
+  addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
   // recherche
   const search = $("#search");
   let t;
@@ -185,6 +211,16 @@ function wireUI(){
   });
 }
 function toggleClear(){ $("#searchClear").hidden = !$("#search").value; }
+function openDrawer(){
+  document.body.classList.add("drawer-open");
+  $("#scrim").hidden = false;
+  $("#navToggle").setAttribute("aria-expanded", "true");
+}
+function closeDrawer(){
+  document.body.classList.remove("drawer-open");
+  $("#scrim").hidden = true;
+  $("#navToggle").setAttribute("aria-expanded", "false");
+}
 
 /* ─────────── reveal on scroll ─────────── */
 let io;

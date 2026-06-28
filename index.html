@@ -21,13 +21,29 @@
 
 <!-- ░░ NAV ░░ -->
 <header class="nav" id="nav">
-  <div class="toolbar__seg" id="families" role="tablist" aria-label="Univers"></div>
+  <button class="nav__toggle" id="navToggle" aria-label="Afficher les familles" aria-controls="sidebar" aria-expanded="false">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a class="nav__brand" href="#top" aria-label="OLDA — accueil">
+    <span class="nav__mark">O</span>
+    <span class="nav__name">OLDA<span class="nav__sub">Catalogue</span></span>
+  </a>
   <div class="toolbar__search nav__search">
     <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     <input id="search" type="search" placeholder="Rechercher une référence…" autocomplete="off" spellcheck="false" aria-label="Rechercher une référence" />
     <button id="searchClear" class="toolbar__clear" aria-label="Effacer" hidden>&times;</button>
   </div>
 </header>
+
+<div class="shell">
+
+  <!-- ░░ SIDEBAR — familles d'objet ░░ -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="side" id="side" aria-label="Familles d'objet"></nav>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <div class="content">
 
 <main id="top">
 
@@ -60,6 +76,9 @@
   </footer>
 
 </main>
+
+  </div><!-- /.content -->
+</div><!-- /.shell -->
 
 <!-- ░░ LIGHTBOX ░░ -->
 <div class="lb" id="lb" hidden aria-modal="true" role="dialog" aria-label="Aperçu du logo">

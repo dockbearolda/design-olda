@@ -23,6 +23,12 @@ http
     try {
       let urlPath = decodeURIComponent(new URL(req.url, "http://x").pathname);
       if (urlPath === "/") urlPath = "/index.html";
+      // répertoires privés : aucun segment ne peut commencer par "_"
+      // (protège assets/_masters/ — les originaux propres, sans filigrane)
+      if (urlPath.split("/").some(seg => seg.startsWith("_"))) {
+        res.writeHead(403).end("Forbidden");
+        return;
+      }
       // empêche le path traversal
       const filePath = path.normalize(path.join(ROOT, urlPath));
       if (!filePath.startsWith(ROOT)) {
