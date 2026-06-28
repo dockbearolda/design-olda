@@ -88,6 +88,7 @@ http
       }
 
       if (urlPath === "/") urlPath = "/index.html";
+      if (urlPath === "/admin") urlPath = "/admin.html";
       // répertoires privés : aucun segment ne peut commencer par "_"
       // (protège assets/_masters/ — les originaux propres, sans filigrane)
       if (urlPath.split("/").some(seg => seg.startsWith("_"))) {
