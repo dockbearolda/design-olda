@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OLDA · Admin</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231E8AD0'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' font-weight='700' text-anchor='middle' fill='%23F6F3EE'%3EO%3C/text%3E%3C/svg%3E" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #F6F3EE;
+  --surface: #fff;
+  --border: #E0DBD3;
+  --text: #1A1714;
+  --muted: #7A756E;
+  --accent: #1E8AD0;
+  --green: #22c55e;
+  --red: #ef4444;
+  --sidebar-w: 220px;
+  --header-h: 56px;
+  --radius: 10px;
+  --font: system-ui, sans-serif;
+}
+
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100dvh; }
+
+/* ── LOGIN ── */
+#login {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100dvh; padding: 24px;
+}
+.login-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 40px; width: 100%; max-width: 360px;
+  display: flex; flex-direction: column; gap: 20px; text-align: center;
+}
+.mark {
+  width: 36px; height: 36px; background: var(--accent); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: Georgia, serif; font-size: 17px; font-weight: 700; color: #F6F3EE;
+  flex-shrink: 0;
+}
+.login-box .mark { width: 52px; height: 52px; font-size: 26px; border-radius: 12px; margin: 0 auto; }
+.login-box h1 { font-size: 20px; font-weight: 600; }
+.login-box p { font-size: 14px; color: var(--muted); }
+.login-box input {
+  width: 100%; padding: 12px 16px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 16px; font-family: inherit;
+  background: var(--bg); color: var(--text); outline: none;
+  text-align: center; letter-spacing: .1em; transition: border-color .15s;
+}
+.login-box input:focus { border-color: var(--accent); }
+.login-box button {
+  width: 100%; padding: 12px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+.login-box button:hover { opacity: .88; }
+.login-error { font-size: 13px; color: var(--red); min-height: 18px; }
+
+/* ── APP ── */
+#app { display: none; flex-direction: column; height: 100dvh; }
+
+.app-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  height: var(--header-h);
+  background: var(--surface); border-bottom: 1px solid var(--border);
+  padding: 0 20px; display: flex; align-items: center; gap: 14px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
+.brand-sub { font-size: 11px; font-weight: 400; color: var(--muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
+.spacer { flex: 1; }
+.save-status { font-size: 13px; color: var(--muted); transition: color .2s; }
+.save-status.saving { color: var(--accent); }
+.save-status.saved  { color: var(--green); }
+.save-status.error  { color: var(--red); }
+
+.add-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s; flex-shrink: 0;
+}
+.add-btn:hover { opacity: .85; }
+.add-btn svg { flex-shrink: 0; }
+
+/* ── UPLOAD PANEL ── */
+.upload-overlay {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(0,0,0,.45); display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.upload-overlay[hidden] { display: none; }
+.upload-panel {
+  background: var(--surface); border-radius: 16px;
+  width: 100%; max-width: 640px; max-height: 90dvh;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.up-header {
+  display: flex; align-items: center; padding: 18px 20px;
+  border-bottom: 1px solid var(--border); gap: 10px; flex-shrink: 0;
+}
+.up-header h2 { font-size: 16px; font-weight: 600; flex: 1; }
+.up-close {
+  width: 32px; height: 32px; border: none; background: var(--bg);
+  border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+}
+.up-close:hover { color: var(--text); }
+.up-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+
+/* drop zone */
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 12px;
+  padding: 40px 20px; text-align: center; cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.drop-zone:hover, .drop-zone.drag-over { border-color: var(--accent); background: rgba(30,138,208,.04); }
+.drop-zone p { font-size: 14px; color: var(--muted); margin-top: 8px; }
+.drop-zone strong { color: var(--text); }
+.drop-zone input { display: none; }
+
+/* preview */
+.up-preview {
+  display: flex; gap: 16px; align-items: flex-start;
+}
+.up-preview[hidden] { display: none; }
+.up-canvas-wrap {
+  width: 140px; height: 140px; flex-shrink: 0;
+  border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  background: #f9f9f9; display: flex; align-items: center; justify-content: center;
+}
+.up-canvas-wrap canvas { max-width: 100%; max-height: 100%; }
+.up-form { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+.up-field label { font-size: 12px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 4px; letter-spacing: .04em; text-transform: uppercase; }
+.up-field input {
+  width: 100%; padding: 9px 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 14px; font-family: inherit;
+  background: var(--bg); color: var(--text); outline: none;
+  transition: border-color .15s;
+}
+.up-field input:focus { border-color: var(--accent); }
+
+/* catégories checkboxes */
+.up-cats { display: flex; flex-direction: column; gap: 6px; }
+.up-cat-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px; cursor: pointer;
+  transition: background .12s;
+}
+.up-cat-item:hover { background: var(--bg); }
+.up-cat-item input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+.up-cat-item span { font-size: 13px; flex: 1; }
+.up-cat-item .cat-count { font-size: 11px; color: var(--muted); }
+
+/* submit */
+.up-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.up-footer .spacer { flex: 1; }
+.up-submit {
+  padding: 10px 22px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+.up-submit:disabled { opacity: .5; cursor: default; }
+.up-submit:not(:disabled):hover { opacity: .85; }
+.up-msg { font-size: 13px; color: var(--muted); }
+
+/* ── LAYOUT ── */
+.app-shell {
+  display: flex;
+  margin-top: var(--header-h);
+  height: calc(100dvh - var(--header-h));
+}
+
+/* ── SIDEBAR ── */
+.admin-sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0;
+  position: sticky;
+  top: var(--header-h);
+  height: calc(100dvh - var(--header-h));
+}
+.sidebar-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); padding: 0 16px 8px;
+}
+.sidebar-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 16px; cursor: pointer; border: none; background: none;
+  width: 100%; text-align: left; color: var(--text);
+  font-family: inherit; font-size: 13px;
+  transition: background .12s;
+  border-left: 3px solid transparent;
+}
+.sidebar-item:hover { background: var(--bg); }
+.sidebar-item.active {
+  background: rgba(30,138,208,.08);
+  border-left-color: var(--accent);
+  color: var(--accent); font-weight: 500;
+}
+.sidebar-item .s-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-item .s-n {
+  font-size: 11px; color: var(--muted); background: var(--bg);
+  border-radius: 20px; padding: 1px 7px; flex-shrink: 0; margin-left: 6px;
+}
+.sidebar-item.active .s-n { background: rgba(30,138,208,.15); color: var(--accent); }
+
+/* ── MAIN ── */
+.admin-main {
+  flex: 1; overflow-y: auto;
+  padding: 28px 28px 60px;
+  display: flex; flex-direction: column; gap: 48px;
+}
+
+.stats { font-size: 14px; color: var(--muted); padding-bottom: 8px; }
+.stats strong { color: var(--text); }
+
+/* ── SECTION ── */
+.cat-section { scroll-margin-top: 16px; }
+.cat-head {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+.cat-head h2 { font-size: 17px; font-weight: 600; }
+.cat-head .cat-n { font-size: 12px; color: var(--muted); }
+.cat-head .spacer { flex: 1; }
+.bulk-btn {
+  font-size: 12px; color: var(--accent); background: none; border: none;
+  cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  transition: background .12s;
+}
+.bulk-btn:hover { background: rgba(30,138,208,.08); }
+
+/* ── GRID ── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+.item-card {
+  position: relative; border-radius: var(--radius);
+  border: 2px solid var(--border); background: var(--surface);
+  overflow: hidden; cursor: pointer;
+  transition: border-color .12s, opacity .15s;
+}
+.item-card:hover { border-color: var(--accent); }
+.item-card.hidden-item { opacity: .32; }
+.item-card.hidden-item .item-img { filter: grayscale(1); }
+.item-img { width: 100%; aspect-ratio: 1; object-fit: contain; padding: 7px; display: block; transition: filter .15s; }
+.item-ref {
+  font-size: 9.5px; color: var(--muted); padding: 3px 6px 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  display: block; text-align: center;
+}
+.item-check {
+  position: absolute; top: 5px; right: 5px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--border); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; transition: background .12s, border-color .12s;
+}
+.item-card:not(.hidden-item) .item-check { background: var(--green); border-color: var(--green); }
+.item-check svg { display: none; }
+.item-card:not(.hidden-item) .item-check svg { display: block; }
+
+.loading { text-align: center; padding: 80px 24px; color: var(--muted); font-size: 15px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <div class="mark">O</div>
+    <div>
+      <h1>Admin OLDA</h1>
+      <p>Gestion de la visibilité des logos</p>
+    </div>
+    <input type="password" id="codeInput" placeholder="Code d'accès" autocomplete="off" />
+    <div class="login-error" id="loginError"></div>
+    <button id="loginBtn">Accéder</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="app-header">
+    <div class="brand">
+      <div class="mark">O</div>
+      <span>OLDA <span class="brand-sub">Admin · Visibilité</span></span>
+    </div>
+    <div class="spacer"></div>
+    <span class="save-status" id="saveStatus"></span>
+    <button class="add-btn" id="openUpload">
+      <svg viewBox="0 0 20 20" width="15" height="15" fill="none"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v8M6 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Ajouter un logo
+    </button>
+  </header>
+
+  <!-- UPLOAD PANEL -->
+  <div class="upload-overlay" id="uploadOverlay" hidden>
+    <div class="upload-panel">
+      <div class="up-header">
+        <h2>Ajouter un logo</h2>
+        <button class="up-close" id="closeUpload">&times;</button>
+      </div>
+      <div class="up-body">
+        <div class="drop-zone" id="dropZone">
+          <svg viewBox="0 0 48 48" width="40" height="40" fill="none"><rect x="4" y="8" width="40" height="32" rx="4" stroke="currentColor" stroke-width="2" opacity=".3"/><path d="M24 16v16M17 23l7-7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <p><strong>Glisser un PDF vectoriel</strong> ici<br>ou cliquer pour sélectionner</p>
+          <input type="file" id="pdfInput" accept=".pdf,application/pdf" />
+        </div>
+
+        <div class="up-preview" id="upPreview" hidden>
+          <div class="up-canvas-wrap"><canvas id="upCanvas"></canvas></div>
+          <div class="up-form">
+            <div class="up-field">
+              <label>Référence</label>
+              <input type="text" id="upRef" placeholder="ex. BEA-15-SXM" autocomplete="off" spellcheck="false" />
+            </div>
+            <div class="up-field">
+              <label>Ajouter aux objets</label>
+              <div class="up-cats" id="upCats"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="up-footer">
+        <span class="up-msg" id="upMsg"></span>
+        <div class="spacer"></div>
+        <button class="up-submit" id="upSubmit" disabled>Ajouter au catalogue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <nav class="admin-sidebar" id="adminSidebar">
+      <p class="sidebar-label">Objets</p>
+    </nav>
+    <main class="admin-main" id="adminMain">
+      <p class="loading">Chargement…</p>
+    </main>
+  </div>
+</div>
+
+<script>
+const CODE = "olda28280";
+const THUMB = "assets/thumbs/";
+
+/* ── auth ── */
+document.getElementById("loginBtn").addEventListener("click", tryLogin);
+document.getElementById("codeInput").addEventListener("keydown", e => { if (e.key === "Enter") tryLogin(); });
+
+function tryLogin() {
+  const input = document.getElementById("codeInput");
+  if (input.value === CODE) {
+    document.getElementById("login").style.display = "none";
+    const app = document.getElementById("app");
+    app.style.display = "flex";
+    loadAdmin();
+  } else {
+    document.getElementById("loginError").textContent = "Code incorrect.";
+    input.value = "";
+    input.focus();
+  }
+}
+
+/* ── state ── */
+let catalog = null;
+let hidden = new Set();
+let saveTimer = null;
+let objets = [];
+
+async function loadAdmin() {
+  try {
+    const [cat, vis] = await Promise.all([
+      fetch("data/catalog.json").then(r => r.json()),
+      fetch("data/visibility.json").then(r => r.json()).catch(() => ({ hidden: [] })),
+    ]);
+    catalog = cat;
+    hidden = new Set(vis.hidden || []);
+    objets = catalog.categories.filter(c => c.family === "Objets");
+    buildSidebar();
+    buildMain();
+    wireScroll();
+  } catch {
+    document.getElementById("adminMain").innerHTML = "<p class='loading'>Erreur de chargement.</p>";
+  }
+}
+
+/* ── sidebar ── */
+function buildSidebar() {
+  const sidebar = document.getElementById("adminSidebar");
+  const label = sidebar.querySelector(".sidebar-label");
+  sidebar.innerHTML = "";
+  sidebar.appendChild(label);
+
+  objets.forEach((cat, i) => {
+    const vis = cat.items.filter(item => !hidden.has(item.ref)).length;
+    const btn = document.createElement("button");
+    btn.className = "sidebar-item" + (i === 0 ? " active" : "");
+    btn.dataset.catId = cat.id;
+    btn.innerHTML = `<span class="s-name">${esc(cat.title)}</span><span class="s-n" id="sn-${esc(cat.id)}">${vis}</span>`;
+    btn.addEventListener("click", () => {
+      const sec = document.getElementById("sec-" + cat.id);
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    sidebar.appendChild(btn);
+  });
+}
+
+function syncSidebar(activeCatId) {
+  document.querySelectorAll(".sidebar-item").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.catId === activeCatId);
+  });
+}
+
+/* ── main ── */
+function buildMain() {
+  const main = document.getElementById("adminMain");
+  main.innerHTML = "";
+
+  // stats
+  const statsEl = document.createElement("p");
+  statsEl.className = "stats";
+  statsEl.id = "globalStats";
+  main.appendChild(statsEl);
+  updateStats();
+
+  objets.forEach(cat => {
+    const section = document.createElement("div");
+    section.className = "cat-section";
+    section.id = "sec-" + cat.id;
+
+    const vis = cat.items.filter(i => !hidden.has(i.ref)).length;
+    const head = document.createElement("div");
+    head.className = "cat-head";
+    head.id = "head-" + cat.id;
+    head.innerHTML = `
+      <h2>${esc(cat.title)}</h2>
+      <span class="cat-n" id="cn-${esc(cat.id)}">${vis}/${cat.items.length} visibles</span>
+      <div class="spacer"></div>
+      <button class="bulk-btn" data-action="all" data-cat="${esc(cat.id)}">Tout cocher</button>
+      <button class="bulk-btn" data-action="none" data-cat="${esc(cat.id)}">Tout masquer</button>
+    `;
+    section.appendChild(head);
+
+    const grid = document.createElement("div");
+    grid.className = "admin-grid";
+    cat.items.forEach(item => {
+      const isHidden = hidden.has(item.ref);
+      const card = document.createElement("div");
+      card.className = "item-card" + (isHidden ? " hidden-item" : "");
+      card.dataset.ref = item.ref;
+      card.innerHTML = `
+        <img class="item-img" src="${THUMB}${item.img.replace(/\.png$/, '.webp')}" alt="${esc(item.ref)}" loading="lazy">
+        <span class="item-ref">${esc(item.ref)}</span>
+        <div class="item-check">
+          <svg viewBox="0 0 12 10" width="9" height="7" fill="none">
+            <polyline points="1,5 4.5,8.5 11,1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      `;
+      card.addEventListener("click", () => toggleItem(item.ref, card, cat));
+      grid.appendChild(card);
+    });
+    section.appendChild(grid);
+
+    head.querySelectorAll(".bulk-btn").forEach(btn => {
+      btn.addEventListener("click", () => bulkToggle(btn.dataset.action, cat, section));
+    });
+
+    main.appendChild(section);
+  });
+}
+
+/* ── scroll spy ── */
+function wireScroll() {
+  const main = document.getElementById("adminMain");
+  const sections = objets.map(cat => document.getElementById("sec-" + cat.id)).filter(Boolean);
+  main.addEventListener("scroll", () => {
+    let current = objets[0]?.id;
+    for (const sec of sections) {
+      if (sec.offsetTop - main.scrollTop <= 60) current = sec.id.replace("sec-", "");
+    }
+    syncSidebar(current);
+  }, { passive: true });
+}
+
+/* ── toggle ── */
+function toggleItem(ref, card, cat) {
+  if (hidden.has(ref)) { hidden.delete(ref); card.classList.remove("hidden-item"); }
+  else { hidden.add(ref); card.classList.add("hidden-item"); }
+  updateCatCount(cat);
+  updateStats();
+  scheduleSave();
+}
+
+function bulkToggle(action, cat, section) {
+  cat.items.forEach(item => {
+    if (action === "all") hidden.delete(item.ref);
+    else hidden.add(item.ref);
+  });
+  section.querySelectorAll(".item-card").forEach(card => {
+    card.classList.toggle("hidden-item", hidden.has(card.dataset.ref));
+  });
+  updateCatCount(cat);
+  updateStats();
+  scheduleSave();
+}
+
+function updateCatCount(cat) {
+  const vis = cat.items.filter(i => !hidden.has(i.ref)).length;
+  const cn = document.getElementById("cn-" + cat.id);
+  if (cn) cn.textContent = `${vis}/${cat.items.length} visibles`;
+  const sn = document.getElementById("sn-" + cat.id);
+  if (sn) sn.textContent = vis;
+}
+
+function updateStats() {
+  const total = objets.reduce((s, c) => s + c.items.length, 0);
+  const hiddenCount = [...hidden].filter(ref => objets.some(c => c.items.some(i => i.ref === ref))).length;
+  const vis = total - hiddenCount;
+  const el = document.getElementById("globalStats");
+  if (el) el.innerHTML = `<strong>${vis}</strong> logo${vis !== 1 ? 's' : ''} visibles · <strong>${hiddenCount}</strong> masqué${hiddenCount !== 1 ? 's' : ''} · ${total} total`;
+}
+
+/* ── auto-save ── */
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  setStatus("saving", "Enregistrement…");
+  saveTimer = setTimeout(save, 600);
+}
+
+async function save() {
+  try {
+    const r = await fetch("/api/visibility", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ hidden: [...hidden] }),
+    });
+    if (!r.ok) throw new Error();
+    setStatus("saved", "Enregistré ✓");
+    setTimeout(() => setStatus("", ""), 2000);
+  } catch {
+    setStatus("error", "Erreur d'enregistrement");
+  }
+}
+
+function setStatus(state, text) {
+  const s = document.getElementById("saveStatus");
+  s.className = "save-status " + state;
+  s.textContent = text;
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+}
+
+/* ════════════════════════════════════════
+   UPLOAD — ajout d'un logo PDF
+   ════════════════════════════════════════ */
+let pdfjsLib = null;
+let upPngData = null;
+let upWebpData = null;
+
+document.getElementById("openUpload").addEventListener("click", openUploadPanel);
+document.getElementById("closeUpload").addEventListener("click", closeUploadPanel);
+document.getElementById("uploadOverlay").addEventListener("click", e => {
+  if (e.target === document.getElementById("uploadOverlay")) closeUploadPanel();
+});
+
+function openUploadPanel() {
+  document.getElementById("uploadOverlay").hidden = false;
+  document.body.style.overflow = "hidden";
+  loadPdfJs();
+}
+function closeUploadPanel() {
+  document.getElementById("uploadOverlay").hidden = true;
+  document.body.style.overflow = "";
+  resetUpload();
+}
+function resetUpload() {
+  upPngData = null; upWebpData = null;
+  document.getElementById("upPreview").hidden = true;
+  document.getElementById("dropZone").style.display = "";
+  document.getElementById("pdfInput").value = "";
+  document.getElementById("upRef").value = "";
+  document.getElementById("upMsg").textContent = "";
+  document.getElementById("upSubmit").disabled = true;
+  document.getElementById("upCats").innerHTML = "";
+}
+
+/* ── PDF.js lazy load ── */
+function loadPdfJs() {
+  if (pdfjsLib) return;
+  const script = document.createElement("script");
+  script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
+  script.type = "module";
+  script.onload = () => {};
+  // use importmap-free approach via dynamic import
+  document.head.appendChild(script);
+}
+
+/* ── drop zone ── */
+const dropZone = document.getElementById("dropZone");
+const pdfInput = document.getElementById("pdfInput");
+
+dropZone.addEventListener("click", () => pdfInput.click());
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag-over"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag-over"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("drag-over");
+  const file = e.dataTransfer.files[0];
+  if (file) handlePdf(file);
+});
+pdfInput.addEventListener("change", () => {
+  if (pdfInput.files[0]) handlePdf(pdfInput.files[0]);
+});
+
+async function handlePdf(file) {
+  if (!file.type.includes("pdf") && !file.name.endsWith(".pdf")) {
+    setUpMsg("Fichier PDF requis.", "error"); return;
+  }
+  setUpMsg("Rendu en cours…", "");
+  try {
+    const arrayBuf = await file.arrayBuffer();
+    // dynamic import pour PDF.js ESM
+    const pdfjsModule = await import("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs");
+    pdfjsLib = pdfjsModule;
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs";
+
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+    const page = await pdf.getPage(1);
+
+    // render full (800px)
+    const fullCanvas = document.getElementById("upCanvas");
+    const vp = page.getViewport({ scale: 1 });
+    const scale = 800 / Math.max(vp.width, vp.height);
+    const vpFull = page.getViewport({ scale });
+    fullCanvas.width = vpFull.width;
+    fullCanvas.height = vpFull.height;
+    const ctx = fullCanvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, fullCanvas.width, fullCanvas.height);
+    await page.render({ canvasContext: ctx, viewport: vpFull }).promise;
+    upPngData = fullCanvas.toDataURL("image/png");
+
+    // render thumb (300px)
+    const thumbCanvas = document.createElement("canvas");
+    const scaleThumb = 300 / Math.max(vp.width, vp.height);
+    const vpThumb = page.getViewport({ scale: scaleThumb });
+    thumbCanvas.width = vpThumb.width;
+    thumbCanvas.height = vpThumb.height;
+    const ctxT = thumbCanvas.getContext("2d");
+    ctxT.fillStyle = "#ffffff";
+    ctxT.fillRect(0, 0, thumbCanvas.width, thumbCanvas.height);
+    await page.render({ canvasContext: ctxT, viewport: vpThumb }).promise;
+    // try webp, fallback png
+    const webpAttempt = thumbCanvas.toDataURL("image/webp");
+    upWebpData = webpAttempt.startsWith("data:image/webp") ? webpAttempt : thumbCanvas.toDataURL("image/png");
+
+    // show preview
+    document.getElementById("dropZone").style.display = "none";
+    buildCatCheckboxes();
+    document.getElementById("upPreview").hidden = false;
+    setUpMsg("", "");
+    checkSubmitReady();
+  } catch(e) {
+    setUpMsg("Erreur de rendu : " + e.message, "error");
+  }
+}
+
+function buildCatCheckboxes() {
+  if (!catalog) return;
+  const objets = catalog.categories.filter(c => c.family === "Objets");
+  const container = document.getElementById("upCats");
+  container.innerHTML = "";
+  objets.forEach(cat => {
+    const label = document.createElement("label");
+    label.className = "up-cat-item";
+    label.innerHTML = `
+      <input type="checkbox" value="${esc(cat.id)}" />
+      <span>${esc(cat.title)}</span>
+      <span class="cat-count">${cat.items.length} logos</span>
+    `;
+    label.querySelector("input").addEventListener("change", checkSubmitReady);
+    container.appendChild(label);
+  });
+}
+
+function checkSubmitReady() {
+  const ref = document.getElementById("upRef").value.trim();
+  const anyChecked = [...document.querySelectorAll("#upCats input:checked")].length > 0;
+  document.getElementById("upSubmit").disabled = !(ref && anyChecked && upPngData);
+}
+document.getElementById("upRef").addEventListener("input", checkSubmitReady);
+
+/* ── submit ── */
+document.getElementById("upSubmit").addEventListener("click", async () => {
+  const ref = document.getElementById("upRef").value.trim();
+  const categories = [...document.querySelectorAll("#upCats input:checked")].map(i => i.value);
+  if (!ref || !categories.length || !upPngData) return;
+
+  const btn = document.getElementById("upSubmit");
+  btn.disabled = true;
+  setUpMsg("Envoi…", "");
+
+  try {
+    const r = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ref, png: upPngData, webp: upWebpData, categories }),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    const data = await r.json();
+
+    setUpMsg(`✓ Logo « ${ref} » ajouté dans ${data.added} catégorie${data.added > 1 ? 's' : ''}.`, "ok");
+
+    // recharger catalog et rebuild
+    const [newCat, newVis] = await Promise.all([
+      fetch("data/catalog.json").then(x => x.json()),
+      fetch("data/visibility.json").then(x => x.json()).catch(() => ({ hidden: [] })),
+    ]);
+    catalog = newCat;
+    hidden = new Set(newVis.hidden || []);
+    objets = catalog.categories.filter(c => c.family === "Objets");
+    buildSidebar();
+    buildMain();
+    wireScroll();
+
+    setTimeout(closeUploadPanel, 1500);
+  } catch(e) {
+    setUpMsg("Erreur : " + e.message, "error");
+    btn.disabled = false;
+  }
+});
+
+function setUpMsg(text, type) {
+  const el = document.getElementById("upMsg");
+  el.textContent = text;
+  el.style.color = type === "error" ? "var(--red)" : type === "ok" ? "var(--green)" : "var(--muted)";
+}
+</script>
+</body>
+</html>

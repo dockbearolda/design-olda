@@ -18,16 +18,28 @@ let lbList = [];        // sous-ensemble courant pour prev/next
 let lbIndex = 0;
 const visibleCats = () => DATA.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
 
+let HIDDEN = new Set(); // refs masquées par l'admin
+
 /* ─────────── boot ─────────── */
 init();
 async function init(){
   $("#yr").textContent = new Date().getFullYear();
   try{
-    DATA = await (await fetch("data/catalog.json")).json();
+    const [catalog, vis] = await Promise.all([
+      fetch("data/catalog.json").then(r => r.json()),
+      fetch("data/visibility.json").then(r => r.json()).catch(() => ({ hidden: [] })),
+    ]);
+    DATA = catalog;
+    HIDDEN = new Set(vis.hidden || []);
   }catch(e){
     $("#sections").innerHTML = "<p class='empty'>Catalogue indisponible.</p>";
     return;
   }
+  // filtrer les items masqués dans chaque catégorie
+  DATA.categories = DATA.categories.map(c => ({
+    ...c,
+    items: c.items.filter(i => !HIDDEN.has(i.ref)),
+  }));
   flat = visibleCats().flatMap(c => c.items.map(i => ({ ...i, cat: c.title, family: c.family })));
   buildMarquee();
   buildSidebar();
