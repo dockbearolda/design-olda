@@ -294,7 +294,8 @@ img{ display:block; max-width:100%; }
 /* ════════════ RESPONSIVE ════════════ */
 /* ── sidebar en tiroir sous 960px ── */
 @media (max-width:960px){
-  .nav__toggle{ display:grid; }
+  /* logo-burger collé au bord gauche (annule le padding gauche du nav) */
+  .nav__toggle{ display:grid; margin-left:calc(2px - var(--gut)); }
   /* le logo est déjà dans le bouton menu → on évite le doublon dans la marque */
   .nav__brand .nav__logo{ display:none; }
   .shell{ grid-template-columns:1fr; }
