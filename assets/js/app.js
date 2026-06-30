@@ -7,7 +7,7 @@ const FULL  = "assets/logos/";    // .png  (lightbox)
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h != null) n.innerHTML = h; return n; };
-const thumb = img => THUMB + img.replace(/\.png$/, ".webp");
+const thumb = it => THUMB + (it.thumb || it.img.replace(/\.png$/, ".webp"));
 
 const HIDDEN_FAMILIES = new Set(["Textile"]); // gérés sur une autre app
 let DATA = null;
@@ -57,7 +57,7 @@ function buildMarquee(){
   const frag = document.createDocumentFragment();
   row.forEach(it => {
     const im = new Image();
-    im.src = thumb(it.img); im.alt = ""; im.loading = "lazy";
+    im.src = thumb(it); im.alt = ""; im.loading = "lazy";
     frag.appendChild(im);
   });
   $("#marquee").appendChild(frag);
@@ -147,7 +147,7 @@ function gridSection(c, isSearch){
     const card = el("button", "card reveal");
     card.style.setProperty("--d", Math.min(i, 8));
     card.innerHTML =
-      `<div class="card__media"><img src="${thumb(it.img)}" alt="Logo ${esc(it.ref)}" loading="lazy" decoding="async"></div>
+      `<div class="card__media"><img src="${thumb(it)}" alt="Logo ${esc(it.ref)}" loading="lazy" decoding="async"></div>
        <div class="card__foot">
          <span class="card__ref">${esc(it.ref)}</span>
          <span class="card__zoom"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M7 17L17 7M17 7H9M17 7v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>

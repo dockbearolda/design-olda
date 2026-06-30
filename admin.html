@@ -351,21 +351,31 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 </div>
 
 <script>
-const CODE = "olda28280";
+// Code saisi par l'utilisateur, gardé en mémoire uniquement (jamais dans le source).
+let ADMIN_CODE = "";
 const THUMB = "assets/thumbs/";
 
 /* ── auth ── */
 document.getElementById("loginBtn").addEventListener("click", tryLogin);
 document.getElementById("codeInput").addEventListener("keydown", e => { if (e.key === "Enter") tryLogin(); });
 
-function tryLogin() {
+async function tryLogin() {
   const input = document.getElementById("codeInput");
-  if (input.value === CODE) {
+  const code = input.value;
+  document.getElementById("loginError").textContent = "";
+  try {
+    // Le code est vérifié CÔTÉ SERVEUR (le serveur seul connaît la valeur valide).
+    const r = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Admin-Code": code },
+      body: "{}",
+    });
+    if (!r.ok) throw new Error();
+    ADMIN_CODE = code;
     document.getElementById("login").style.display = "none";
-    const app = document.getElementById("app");
-    app.style.display = "flex";
+    document.getElementById("app").style.display = "flex";
     loadAdmin();
-  } else {
+  } catch {
     document.getElementById("loginError").textContent = "Code incorrect.";
     input.value = "";
     input.focus();
@@ -460,7 +470,7 @@ function buildMain() {
       card.className = "item-card" + (isHidden ? " hidden-item" : "");
       card.dataset.ref = item.ref;
       card.innerHTML = `
-        <img class="item-img" src="${THUMB}${item.img.replace(/\.png$/, '.webp')}" alt="${esc(item.ref)}" loading="lazy">
+        <img class="item-img" src="${THUMB}${item.thumb || item.img.replace(/\.png$/, '.webp')}" alt="${esc(item.ref)}" loading="lazy">
         <span class="item-ref">${esc(item.ref)}</span>
         <div class="item-check">
           <svg viewBox="0 0 12 10" width="9" height="7" fill="none">
@@ -543,7 +553,7 @@ async function save() {
   try {
     const r = await fetch("/api/visibility", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Admin-Code": ADMIN_CODE },
       body: JSON.stringify({ hidden: [...hidden] }),
     });
     if (!r.ok) throw new Error();
@@ -580,7 +590,6 @@ document.getElementById("uploadOverlay").addEventListener("click", e => {
 function openUploadPanel() {
   document.getElementById("uploadOverlay").hidden = false;
   document.body.style.overflow = "hidden";
-  loadPdfJs();
 }
 function closeUploadPanel() {
   document.getElementById("uploadOverlay").hidden = true;
@@ -596,17 +605,6 @@ function resetUpload() {
   document.getElementById("upMsg").textContent = "";
   document.getElementById("upSubmit").disabled = true;
   document.getElementById("upCats").innerHTML = "";
-}
-
-/* ── PDF.js lazy load ── */
-function loadPdfJs() {
-  if (pdfjsLib) return;
-  const script = document.createElement("script");
-  script.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs";
-  script.type = "module";
-  script.onload = () => {};
-  // use importmap-free approach via dynamic import
-  document.head.appendChild(script);
 }
 
 /* ── drop zone ── */
@@ -717,7 +715,7 @@ document.getElementById("upSubmit").addEventListener("click", async () => {
   try {
     const r = await fetch("/api/upload", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-Admin-Code": ADMIN_CODE },
       body: JSON.stringify({ ref, png: upPngData, webp: upWebpData, categories }),
     });
     if (!r.ok) throw new Error(await r.text());
