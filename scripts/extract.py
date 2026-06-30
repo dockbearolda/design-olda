@@ -3,7 +3,8 @@
    et un dossier d'images dédupliquées."""
 import openpyxl, hashlib, json, re, os, sys
 
-SRC = "/Users/charlie/Downloads/DESIGN OLDA 2025.xlsx"
+# Chemin du classeur source : 1er argument CLI, sinon $OLDA_XLSX, sinon défaut local.
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("OLDA_XLSX", "DESIGN OLDA 2025.xlsx")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IMG_DIR = os.path.join(ROOT, "assets", "logos")
 DATA = os.path.join(ROOT, "data", "catalog.json")
