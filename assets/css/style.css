@@ -91,12 +91,15 @@ img{ display:block; max-width:100%; }
 .nav__brand{ display:flex; align-items:center; gap:11px; }
 .nav__name{ display:flex; flex-direction:column; line-height:1; font-family:var(--ff-display); font-size:19px; font-weight:600; letter-spacing:.02em; }
 .nav__sub{ font-family:var(--ff-body); font-size:10px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-mute); margin-top:4px; }
+/* sur mobile, le logo glass EST le bouton menu (incrusté avec le burger) */
 .nav__toggle{
   display:none; appearance:none; border:0; cursor:pointer; flex:none;
-  width:42px; height:42px; border-radius:11px; place-items:center;
-  background:var(--paper-2); color:var(--ink);
+  width:44px; height:44px; padding:0; place-items:center;
+  background:transparent; color:var(--ink);
 }
-.nav__toggle:hover{ background:var(--line); }
+.nav__toggle img{ width:44px; height:44px; display:block; pointer-events:none; }
+.nav__toggle:hover{ background:transparent; }
+.nav__toggle:active{ transform:scale(.92); transition:transform .12s; }
 /* la barre de recherche pousse à droite, largeur bornée sur grand écran */
 .nav .nav__search{ flex:0 1 360px; min-width:200px; margin-left:auto; }
 
@@ -292,6 +295,8 @@ img{ display:block; max-width:100%; }
 /* ── sidebar en tiroir sous 960px ── */
 @media (max-width:960px){
   .nav__toggle{ display:grid; }
+  /* le logo est déjà dans le bouton menu → on évite le doublon dans la marque */
+  .nav__brand .nav__logo{ display:none; }
   .shell{ grid-template-columns:1fr; }
   .sidebar{
     position:fixed; top:0; left:0; z-index:200;
