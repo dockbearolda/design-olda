@@ -326,3 +326,33 @@ img{ display:block; max-width:100%; }
 @media (min-width:760px) and (max-width:1280px){
   .grid{ grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); }
 }
+
+/* ════════════ FEEL NATIF (PWA / tactile) ════════════ */
+body{
+  -webkit-tap-highlight-color:transparent;     /* pas de flash gris au tap */
+  overscroll-behavior-y:none;                   /* coupe le rebond / pull-to-refresh navigateur */
+  -webkit-touch-callout:none;                   /* pas de menu long-press (≈ anti « enregistrer l'image ») */
+}
+/* pas de délai 300ms ni double-tap-zoom sur les éléments interactifs */
+button, a, input, .card, .side__item, .seg-btn{ touch-action:manipulation; }
+/* le chrome n'est pas sélectionnable ; le texte utile (réfs) reste copiable */
+.nav, .sidebar, .footer, .marquee, .card__zoom, .card__foot{ -webkit-user-select:none; user-select:none; }
+.card__ref, .lb__ref, .lb__cat{ -webkit-user-select:text; user-select:text; -webkit-touch-callout:default; }
+/* les logos ne sont pas « draggables » (renforce l'anti-vol) */
+.card__media img, .lb__frame img, .marquee__track img{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+
+/* feedback tactile : on remplace le :hover (absent au doigt) par un :active net */
+@media (hover:none){
+  .card:active{ transform:scale(.975); box-shadow:var(--shadow-sm); transition:transform .12s var(--ease); }
+  .side__item:active, .seg-btn:active, .lb__copy:active,
+  .nav__toggle:active, .toolbar__clear:active{ opacity:.6; transition:opacity .1s; }
+  .lb__close:active, .lb__nav:active{ background:rgba(255,255,255,.34); }
+}
+
+/* app installée (standalone) : on assume le plein écran sans barre navigateur */
+@media (display-mode:standalone){
+  /* le sticky colle au bord ; on garantit le confort sous la barre d'état */
+  .nav{ padding-top:max(14px, env(safe-area-inset-top)); }
+  /* désactive le smooth-scroll global qui peut « flotter » en standalone iOS */
+  html{ scroll-behavior:auto; }
+}

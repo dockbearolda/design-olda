@@ -5,7 +5,8 @@
       "name": "olda",
       "runtimeExecutable": "node",
       "runtimeArgs": ["server.js"],
-      "port": 8753
+      "port": 8753,
+      "autoPort": true
     }
   ]
 }

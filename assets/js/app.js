@@ -20,6 +20,11 @@ const visibleCats = () => DATA.categories.filter(c => !HIDDEN_FAMILIES.has(c.fam
 
 let HIDDEN = new Set(); // refs masquées par l'admin
 
+/* ─────────── service worker (offline + chargement instantané) ─────────── */
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+}
+
 /* ─────────── boot ─────────── */
 init();
 async function init(){
@@ -221,6 +226,19 @@ function wireUI(){
     if (e.key === "ArrowLeft") stepLB(-1);
     if (e.key === "ArrowRight") stepLB(1);
   });
+
+  // gestes tactiles (feel natif) : swipe ←/→ = naviguer, swipe ↓ = fermer
+  const stage = $("#lbStage");
+  let tsX = 0, tsY = 0;
+  stage.addEventListener("touchstart", e => {
+    const t = e.changedTouches[0]; tsX = t.clientX; tsY = t.clientY;
+  }, { passive: true });
+  stage.addEventListener("touchend", e => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - tsX, dy = t.clientY - tsY;
+    if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) stepLB(dx < 0 ? 1 : -1);
+    else if (dy > 70 && Math.abs(dy) > Math.abs(dx)) closeLB();
+  }, { passive: true });
 }
 function toggleClear(){ $("#searchClear").hidden = !$("#search").value; }
 function openDrawer(){

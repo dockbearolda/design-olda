@@ -1,0 +1,17 @@
+{
+  "name": "OLDA · Catalogue Design 2025",
+  "short_name": "OLDA",
+  "description": "Catalogue virtuel des logos OLDA — Saint-Martin / French West Indies.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F4F0E9",
+  "theme_color": "#F6F3EE",
+  "icons": [
+    { "src": "/assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
