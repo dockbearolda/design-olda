@@ -12,6 +12,12 @@ const PORT = process.env.PORT || 8753;
 // dans l'historique git, donc à considérer comme compromis).
 const ADMIN_CODE = process.env.ADMIN_CODE || "olda28280";
 
+// Stockage persistant : volume Railway (RAILWAY_VOLUME_MOUNT_PATH) ou DATA_DIR,
+// sinon ROOT en dev local. On y garde TOUT l'état mutable : data/ (catalog +
+// visibility) et les images uploadées (assets/logos + assets/thumbs).
+const DATA_ROOT = process.env.DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || ROOT;
+const PERSIST_PREFIXES = ["/data/", "/assets/logos/", "/assets/thumbs/"];
+
 const TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -68,6 +74,24 @@ function readBody(req, limit) {
   });
 }
 
+// Initialise le stockage persistant : au premier boot sur un volume vide, on y
+// copie les graines de l'image (217 logos + catalog.json + visibility.json
+// committés), puis on garantit l'existence des dossiers d'écriture.
+function initStorage() {
+  if (DATA_ROOT !== ROOT && !fs.existsSync(path.join(DATA_ROOT, "data", "catalog.json"))) {
+    for (const rel of ["data", "assets/logos", "assets/thumbs"]) {
+      const src = path.join(ROOT, rel);
+      const dst = path.join(DATA_ROOT, rel);
+      fs.mkdirSync(dst, { recursive: true });
+      if (fs.existsSync(src)) fs.cpSync(src, dst, { recursive: true });
+    }
+    console.log("volume persistant initialisé depuis l'image");
+  }
+  for (const rel of ["data", "assets/logos", "assets/thumbs"]) {
+    fs.mkdirSync(path.join(DATA_ROOT, rel), { recursive: true });
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     let urlPath;
@@ -107,7 +131,7 @@ const server = http.createServer(async (req, res) => {
           }
 
           const result = await withCatalogLock(async () => {
-            const catPath = path.join(ROOT, "data", "catalog.json");
+            const catPath = path.join(DATA_ROOT, "data", "catalog.json");
             const catalog = JSON.parse(await fsp.readFile(catPath, "utf8"));
 
             // Ne rien écrire si la ref est déjà présente partout où on la demande.
@@ -123,8 +147,8 @@ const server = http.createServer(async (req, res) => {
             const pngBuf = Buffer.from(png.replace(/^data:image\/\w+;base64,/, ""), "base64");
             const webpBuf = Buffer.from((webp || png).replace(/^data:image\/\w+;base64,/, ""), "base64");
 
-            await fsp.writeFile(path.join(ROOT, "assets", "logos", imgName), pngBuf);
-            await fsp.writeFile(path.join(ROOT, "assets", "thumbs", thumbFile), webpBuf);
+            await fsp.writeFile(path.join(DATA_ROOT, "assets", "logos", imgName), pngBuf);
+            await fsp.writeFile(path.join(DATA_ROOT, "assets", "thumbs", thumbFile), webpBuf);
 
             // On stocke le nom RÉEL de la vignette (peut être .png si WebP indispo).
             const newItem = { ref, img: imgName, thumb: thumbFile };
@@ -151,7 +175,7 @@ const server = http.createServer(async (req, res) => {
           const parsed = JSON.parse(body);
           if (!Array.isArray(parsed.hidden)) throw new Error("invalid");
           await writeAtomic(
-            path.join(ROOT, "data", "visibility.json"),
+            path.join(DATA_ROOT, "data", "visibility.json"),
             JSON.stringify({ hidden: parsed.hidden }, null, 2)
           );
           res.writeHead(200, { "Content-Type": TYPES[".json"] }).end('{"ok":true}');
@@ -180,9 +204,12 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(403).end("Forbidden");
       return;
     }
+    // Les données mutables (catalog, visibilité, logos uploadés) viennent du volume ;
+    // le reste (html/css/js/icônes) vient de l'image.
+    const base = PERSIST_PREFIXES.some(p => urlPath.startsWith(p)) ? DATA_ROOT : ROOT;
     // Empêche le path traversal (séparateur final → pas de bypass par dossier voisin).
-    const filePath = path.normalize(path.join(ROOT, urlPath));
-    if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
+    const filePath = path.normalize(path.join(base, urlPath));
+    if (filePath !== base && !filePath.startsWith(base + path.sep)) {
       res.writeHead(403).end("Forbidden");
       return;
     }
@@ -211,7 +238,8 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`OLDA catalogue → http://0.0.0.0:${PORT}`));
+initStorage();
+server.listen(PORT, () => console.log(`OLDA catalogue → http://0.0.0.0:${PORT} (data: ${DATA_ROOT})`));
 
 // Graceful shutdown : Railway envoie SIGTERM au redeploy. On laisse les requêtes
 // en cours se terminer (les writes atomiques évitent toute corruption JSON).
