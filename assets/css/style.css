@@ -86,6 +86,8 @@ img{ display:block; max-width:100%; }
   font-family:var(--ff-display); font-weight:600; font-size:19px;
   box-shadow:var(--shadow-sm); flex:none;
 }
+/* logo glass (SVG) en haut à gauche — la tuile + ombre sont dans le SVG */
+.nav__logo{ width:44px; height:44px; flex:none; display:block; margin:-2px 0; }
 .nav__brand{ display:flex; align-items:center; gap:11px; }
 .nav__name{ display:flex; flex-direction:column; line-height:1; font-family:var(--ff-display); font-size:19px; font-weight:600; letter-spacing:.02em; }
 .nav__sub{ font-family:var(--ff-body); font-size:10px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-mute); margin-top:4px; }
