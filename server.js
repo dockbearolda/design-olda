@@ -239,7 +239,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 initStorage();
-server.listen(PORT, () => console.log(`OLDA catalogue → http://0.0.0.0:${PORT} (data: ${DATA_ROOT})`));
+server.listen(PORT, () => console.log(`OLDA catalogue [build:volume-r2] → http://0.0.0.0:${PORT} (data: ${DATA_ROOT})`));
 
 // Graceful shutdown : Railway envoie SIGTERM au redeploy. On laisse les requêtes
 // en cours se terminer (les writes atomiques évitent toute corruption JSON).
