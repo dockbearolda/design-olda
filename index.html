@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>OLDA · Catalogue Design 2025 — Logos Saint-Martin</title>
+<!-- Lance les fetches des données dès le parsing du <head> (app.js les récupère
+     ensuite via window.__olda) → le catalogue est prêt plus tôt, LCP plus rapide. -->
+<script>window.__olda={catalog:fetch("data/catalog.json").then(function(r){return r.json()}),vis:fetch("data/visibility.json").then(function(r){return r.json()}).catch(function(){return{hidden:[]}})};</script>
 <meta name="description" content="Le catalogue virtuel des logos OLDA : 217 visuels Saint-Martin / French West Indies, du textile aux objets souvenirs. Studio de design & d'impression." />
 <meta name="theme-color" content="#F6F3EE" />
 <meta property="og:title" content="OLDA · Catalogue Design 2025" />
@@ -17,9 +20,10 @@
 <link rel="apple-touch-icon" href="/assets/icons/apple-touch-icon.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/icon-192.png" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231E8AD0'/%3E%3Ctext x='16' y='22' font-family='Georgia,serif' font-size='17' font-weight='700' text-anchor='middle' fill='%23F6F3EE'%3EO%3C/text%3E%3C/svg%3E" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<!-- Polices auto-hébergées + préchargées (chemin critique du LCP) : plus de round-trip
+     Google qui retardait le rendu ; fonctionne aussi hors-ligne (PWA). -->
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/fraunces-latin.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="/assets/fonts/geist-latin.woff2" crossorigin />
 <link rel="stylesheet" href="assets/css/style.css" />
 <script>document.documentElement.classList.add('js');</script>
 </head>

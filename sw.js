@@ -2,7 +2,7 @@
    OLDA · Service Worker — offline + chargement instantané
    Zéro dépendance. Bump CACHE pour invalider à chaque déploiement.
    ════════════════════════════════════════════════════ */
-const CACHE = "olda-v1";
+const CACHE = "olda-v4";
 
 // Coquille de l'app pré-cachée à l'installation (tolérant aux 404).
 const SHELL = [
@@ -15,6 +15,8 @@ const SHELL = [
   "/manifest.webmanifest",
   "/assets/icons/icon-192.png",
   "/assets/icons/apple-touch-icon.png",
+  "/assets/fonts/fraunces-latin.woff2",
+  "/assets/fonts/geist-latin.woff2",
 ];
 
 self.addEventListener("install", e => {
@@ -45,6 +47,26 @@ self.addEventListener("fetch", e => {
   // On ne touche qu'au même origine, en GET, hors API (l'admin doit voir le réseau).
   if (req.method !== "GET" || url.origin !== location.origin || url.pathname.startsWith("/api/")) {
     return; // comportement réseau natif
+  }
+
+  // Données mutables (catalog/visibility) → RÉSEAU D'ABORD : après une modif admin
+  // on veut toujours la dernière version ; le cache ne sert que de repli hors-ligne.
+  // (Sans ça, le stale-while-revalidate ci-dessous montrait l'ancien JSON un reload
+  // de trop après un changement de visibilité.)
+  if (url.pathname.startsWith("/data/")) {
+    e.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      try {
+        // cache:"reload" → on court-circuite le cache HTTP du navigateur et on va
+        // VRAIMENT au réseau (sinon une réponse encore en cache masque la nouvelle).
+        const fresh = await fetch(req, { cache: "reload" });
+        if (fresh && fresh.status === 200) cache.put(req, fresh.clone());
+        return fresh;
+      } catch {
+        return (await cache.match(req)) || Response.error();
+      }
+    })());
+    return;
   }
 
   // Navigation (ouverture d'une page) → réseau d'abord, repli sur le cache puis index.

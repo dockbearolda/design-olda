@@ -3,6 +3,31 @@
    Gallery-grade · warm paper · ocean-teal accent
    ════════════════════════════════════════════════════ */
 
+/* ── Polices auto-hébergées (Fraunces + Geist, variables) ──
+   Servies depuis notre propre domaine → chargement rapide, fonctionne hors-ligne
+   (PWA), et plus de round-trip Google qui bloquait le LCP. subsets latin + latin-ext
+   (couvre é è à ç œ, tirets longs…). font-display:swap = texte lisible immédiatement. */
+@font-face{
+  font-family:"Fraunces"; font-style:normal; font-weight:300 600; font-display:swap;
+  src:url("/assets/fonts/fraunces-latin.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"Fraunces"; font-style:normal; font-weight:300 600; font-display:swap;
+  src:url("/assets/fonts/fraunces-latin-ext.woff2") format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face{
+  font-family:"Geist"; font-style:normal; font-weight:300 600; font-display:swap;
+  src:url("/assets/fonts/geist-latin.woff2") format("woff2");
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:"Geist"; font-style:normal; font-weight:300 600; font-display:swap;
+  src:url("/assets/fonts/geist-latin-ext.woff2") format("woff2");
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
 :root{
   --paper:    #F4F0E9;   /* canvas chaud */
   --paper-2:  #EFEAE1;
@@ -94,7 +119,7 @@ img{ display:block; max-width:100%; }
 /* sur mobile, le logo glass EST le bouton menu (incrusté avec le burger) */
 .nav__toggle{
   display:none; appearance:none; border:0; cursor:pointer; flex:none;
-  width:44px; height:44px; padding:0; place-items:center;
+  width:48px; height:48px; padding:0; place-items:center;   /* cible tactile ≥48px (tablette) */
   background:transparent; color:var(--ink);
 }
 .nav__toggle img{ width:44px; height:44px; display:block; pointer-events:none; }
@@ -124,7 +149,7 @@ img{ display:block; max-width:100%; }
   appearance:none; border:0; cursor:pointer; font:inherit; width:100%;
   display:flex; align-items:center; justify-content:space-between; gap:10px;
   padding:10px 12px; border-radius:10px; color:var(--ink-soft); background:transparent;
-  text-align:left; transition:background .2s, color .2s; min-height:44px;
+  text-align:left; transition:background .2s, color .2s; min-height:48px;
 }
 .side__item:hover{ background:var(--paper-2); color:var(--ink); }
 .side__item[aria-current="true"]{ background:var(--card); color:var(--ink); box-shadow:var(--shadow-sm); font-weight:500; }
@@ -152,7 +177,10 @@ img{ display:block; max-width:100%; }
           mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
   overflow:hidden;
 }
-.marquee__track{ display:flex; gap:clamp(40px,6vw,86px); width:max-content; animation:scroll 60s linear infinite; }
+/* min-height = hauteur finale des logos : réserve la place AVANT que le JS n'injecte
+   la bande. Sans ça, la bande passait de vide à pleine et poussait tout le catalogue
+   vers le bas (gros CLS ~0.8). align-items:center garde les logos centrés. */
+.marquee__track{ display:flex; align-items:center; gap:clamp(40px,6vw,86px); width:max-content; min-height:clamp(44px,6vw,66px); animation:scroll 60s linear infinite; }
 .marquee:hover .marquee__track{ animation-play-state:paused; }
 .marquee__track img{ height:clamp(44px,6vw,66px); width:auto; opacity:.62; transition:opacity .3s; }
 .marquee__track img:hover{ opacity:1; }
@@ -188,7 +216,11 @@ img{ display:block; max-width:100%; }
 .toolbar__count{ font-size:13.5px; color:var(--ink-mute); padding:18px 4px 28px; letter-spacing:.01em; }
 
 /* ════════════ SECTIONS / GRID ════════════ */
-.sections{ display:flex; flex-direction:column; gap:clamp(56px,8vw,96px); }
+/* min-height : réserve la hauteur d'un écran AVANT que le JS n'injecte les cartes.
+   Sans ça, le footer était visible tout en haut (catalogue vide) puis chassé vers le
+   bas au remplissage → gros saut de layout (CLS). Le catalogue dépasse toujours 100vh,
+   donc cette réserve est invisible une fois rempli. */
+.sections{ display:flex; flex-direction:column; gap:clamp(56px,8vw,96px); min-height:100vh; }
 .cat{ scroll-margin-top:130px; }
 .cat__head{ display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:28px; }
 .cat__title{ font-family:var(--ff-display); font-weight:400; font-size:clamp(26px,3.6vw,40px); letter-spacing:-.015em; }
@@ -209,9 +241,10 @@ img{ display:block; max-width:100%; }
   display:flex; flex-direction:column; text-align:left;
   background:var(--card); border:1px solid var(--line); border-radius:var(--r);
   overflow:hidden; transition:transform .4s var(--ease), box-shadow .4s var(--ease), border-color .4s;
-  will-change:transform;
 }
-.card:hover{ transform:translateY(-5px); box-shadow:var(--shadow); border-color:var(--line-2); }
+/* will-change seulement au survol : évite de promouvoir ~800 cartes en couches GPU
+   (coût mémoire/compositing) tout en gardant le hover fluide. */
+.card:hover{ transform:translateY(-5px); box-shadow:var(--shadow); border-color:var(--line-2); will-change:transform; }
 .card:focus-visible{ outline:2px solid var(--sea); outline-offset:3px; }
 .card__media{
   position:relative; aspect-ratio:1; padding:16%;
@@ -274,7 +307,7 @@ img{ display:block; max-width:100%; }
 .lb__copy{
   margin-left:auto; display:inline-flex; align-items:center; gap:9px; cursor:pointer;
   padding:12px 20px; border-radius:999px; border:1px solid var(--line-2); background:var(--paper);
-  font:inherit; font-size:14px; color:var(--ink); transition:border-color .25s, background .25s, color .25s; min-height:44px;
+  font:inherit; font-size:14px; color:var(--ink); transition:border-color .25s, background .25s, color .25s; min-height:48px;
 }
 .lb__copy:hover{ border-color:var(--sea); color:var(--sea); }
 .lb__copy.done{ background:var(--sea); border-color:var(--sea); color:#fff; }
@@ -283,7 +316,7 @@ img{ display:block; max-width:100%; }
   background:rgba(255,255,255,.12); backdrop-filter:blur(8px);
   display:grid; place-items:center; border-radius:50%; transition:background .25s, transform .25s;
 }
-.lb__close{ top:max(20px,env(safe-area-inset-top)); right:24px; width:46px; height:46px; font-size:26px; line-height:1; }
+.lb__close{ top:max(20px,env(safe-area-inset-top)); right:24px; width:48px; height:48px; font-size:26px; line-height:1; }
 .lb__nav{ top:50%; transform:translateY(-50%); width:54px; height:54px; font-size:30px; line-height:1; }
 .lb__nav--prev{ left:clamp(12px,3vw,40px); }
 .lb__nav--next{ right:clamp(12px,3vw,40px); }
@@ -319,7 +352,7 @@ img{ display:block; max-width:100%; }
   .nav{ flex-wrap:wrap; gap:10px 12px; }
   .nav__name{ font-size:17px; }
   .nav .nav__search{ order:3; flex:1 1 100%; min-width:0; margin-left:0; }
-  .lb__nav{ width:46px; height:46px; }
+  .lb__nav{ width:48px; height:48px; }
   .lb__meta{ padding-bottom:calc(24px + env(safe-area-inset-bottom)); }
 }
 @media (min-width:760px){
