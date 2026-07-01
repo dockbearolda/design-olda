@@ -30,9 +30,12 @@ init();
 async function init(){
   $("#yr").textContent = new Date().getFullYear();
   try{
+    // Réutilise les fetches lancés dès le <head> (window.__olda) pour gagner du temps
+    // au chargement ; repli sur un fetch classique si le prefetch n'a pas eu lieu.
+    const pf = (typeof window !== "undefined" && window.__olda) || {};
     const [catalog, vis] = await Promise.all([
-      fetch("data/catalog.json").then(r => r.json()),
-      fetch("data/visibility.json").then(r => r.json()).catch(() => ({ hidden: [] })),
+      pf.catalog || fetch("data/catalog.json").then(r => r.json()),
+      pf.vis || fetch("data/visibility.json").then(r => r.json()).catch(() => ({ hidden: [] })),
     ]);
     DATA = catalog;
     HIDDEN = new Set(vis.hidden || []);
@@ -122,7 +125,7 @@ function render(){
       return;
     }
     $("#empty").hidden = true;
-    sections.appendChild(gridSection({ title: "Résultats", sub: `pour « ${query} »`, items: matches }, true));
+    sections.appendChild(gridSection({ title: "Résultats", sub: `pour « ${query} »`, items: matches }, true, true));
     $("#count").textContent = `${matches.length} logo${matches.length > 1 ? "s" : ""} trouvé${matches.length > 1 ? "s" : ""}`;
     revealObserver();
     return;
@@ -131,13 +134,13 @@ function render(){
   $("#empty").hidden = true;
   const cats = activeCat === "Tout" ? visibleCats() : visibleCats().filter(c => c.id === activeCat);
   lbList = cats.flatMap(c => c.items.map(i => ({ ...i, cat: c.title })));
-  cats.forEach(c => sections.appendChild(gridSection(c)));
+  cats.forEach((c, idx) => sections.appendChild(gridSection(c, false, idx === 0)));
   const tot = lbList.length;
   $("#count").textContent = `${tot} logos · ${cats.length} famille${cats.length > 1 ? "s" : ""}`;
   revealObserver();
 }
 
-function gridSection(c, isSearch){
+function gridSection(c, isSearch, eager){
   const sec = el("section", "cat");
   sec.id = isSearch ? "" : slug(c.title);
   const head = el("div", "cat__head");
@@ -149,10 +152,14 @@ function gridSection(c, isSearch){
 
   const grid = el("div", "grid");
   c.items.forEach((it, i) => {
-    const card = el("button", "card reveal");
-    card.style.setProperty("--d", Math.min(i, 8));
+    // Cartes au-dessus de la ligne de flottaison (1re famille) : image en chargement
+    // "eager" + priorité haute sur la 1re, et pas d'animation d'entrée → LCP peint
+    // tout de suite (sinon l'image LCP attendait le lazy-load + le fondu opacity).
+    const above = eager && i < 10;
+    const card = el("button", above ? "card" : "card reveal");
+    if (!above) card.style.setProperty("--d", Math.min(i, 8));
     card.innerHTML =
-      `<div class="card__media"><img src="${thumb(it)}" alt="Logo ${esc(it.ref)}" loading="lazy" decoding="async"></div>
+      `<div class="card__media"><img src="${thumb(it)}" alt="Logo ${esc(it.ref)}" loading="${above ? "eager" : "lazy"}"${i === 0 && eager ? ' fetchpriority="high"' : ""} decoding="async"></div>
        <div class="card__foot">
          <span class="card__ref">${esc(it.ref)}</span>
          <span class="card__zoom"><svg viewBox="0 0 24 24" width="13" height="13"><path d="M7 17L17 7M17 7H9M17 7v8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>

@@ -8,7 +8,8 @@ SRC = os.path.join(ROOT, "assets", "logos")
 OUT = os.path.join(ROOT, "assets", "thumbs")
 os.makedirs(OUT, exist_ok=True)
 
-SIZE = 640          # canvas carré
+SIZE = 400          # canvas carré (≈2x la taille d'affichage en grille → net en Retina,
+                    # sans le surpoids d'un 640px inutile : vignettes ~2x plus légères)
 PAD = 0.14          # marge relative
 
 def trim(im):

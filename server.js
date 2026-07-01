@@ -4,6 +4,11 @@ const fs = require("fs");
 const fsp = require("fs/promises");
 const path = require("path");
 const crypto = require("crypto");
+const zlib = require("zlib");
+
+// Types texte compressibles (le gzip divise ~10x le poids du HTML/CSS/JS/JSON).
+// Les images (png/webp) et woff2 sont déjà compressées → on n'y touche pas.
+const COMPRESSIBLE = /\.(html|css|js|json|svg|webmanifest)$/;
 
 const ROOT = __dirname;
 const PORT = process.env.PORT || 8753;
@@ -225,11 +230,26 @@ const server = http.createServer(async (req, res) => {
       }
       const ext = path.extname(filePath).toLowerCase();
       const headers = { "Content-Type": TYPES[ext] || "application/octet-stream", ...securityHeaders() };
-      // cache long pour les assets immuables (images/fonts), court pour le reste
+      // cache long pour les assets immuables (images/fonts), court pour le reste.
+      // Les données mutables (/data/*.json) sont en "no-cache" : le navigateur revalide
+      // à chaque fois → un changement admin (visibilité/upload) est visible tout de suite,
+      // sans attendre l'expiration d'un cache. Voir aussi sw.js (réseau d'abord sur /data/).
       if (/\.(png|webp|svg|woff2|ico)$/.test(filePath)) {
         headers["Cache-Control"] = "public, max-age=31536000, immutable";
+      } else if (urlPath.startsWith("/data/")) {
+        headers["Cache-Control"] = "no-cache";
       } else {
         headers["Cache-Control"] = "public, max-age=300";
+      }
+      // Compression gzip pour le texte si le client l'accepte (zlib natif, zéro dép).
+      if (COMPRESSIBLE.test(filePath) && /\bgzip\b/.test(req.headers["accept-encoding"] || "")) {
+        zlib.gzip(data, (gzErr, gz) => {
+          if (gzErr) return res.writeHead(200, headers).end(data);
+          headers["Content-Encoding"] = "gzip";
+          headers["Vary"] = "Accept-Encoding";
+          res.writeHead(200, headers).end(gz);
+        });
+        return;
       }
       res.writeHead(200, headers).end(data);
     });
