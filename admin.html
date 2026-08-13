@@ -326,7 +326,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
               <input type="text" id="upRef" placeholder="ex. BEA-15-SXM" autocomplete="off" spellcheck="false" />
             </div>
             <div class="up-field">
-              <label>Ajouter aux objets</label>
+              <label>Ajouter aux catégories</label>
               <div class="up-cats" id="upCats"></div>
             </div>
           </div>
@@ -342,7 +342,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 
   <div class="app-shell">
     <nav class="admin-sidebar" id="adminSidebar">
-      <p class="sidebar-label">Objets</p>
+      <p class="sidebar-label">Catalogue</p>
     </nav>
     <main class="admin-main" id="adminMain">
       <p class="loading">Chargement…</p>
@@ -383,10 +383,30 @@ async function tryLogin() {
 }
 
 /* ── state ── */
+const HIDDEN_FAMILIES = new Set(["Textile"]); // géré sur une autre app
+
 let catalog = null;
-let hidden = new Set();
+let hidden = new Set();   // clés « catId::ref » : on masque PAR catégorie
 let saveTimer = null;
-let objets = [];
+let managed = [];         // catégories pilotées ici = celles affichées côté vitrine
+
+const visKey = (catId, ref) => catId + "::" + ref;
+// Réf nue = ancien format (masquait le design dans TOUT le catalogue).
+const isHidden = (catId, ref) => hidden.has(ref) || hidden.has(visKey(catId, ref));
+
+// Convertit les réfs nues héritées en clés par catégorie. Rendu identique, mais
+// une action sur une catégorie ne peut plus vider les autres : le même visuel est
+// proposé sur plusieurs supports (tasses, porte-clés…) et partageait la même réf.
+function migrateLegacy() {
+  const bare = [...hidden].filter(k => !k.includes("::"));
+  for (const ref of bare) {
+    hidden.delete(ref);
+    for (const c of catalog.categories) {
+      if (c.items.some(i => i.ref === ref)) hidden.add(visKey(c.id, ref));
+    }
+  }
+  return bare.length > 0;
+}
 
 async function loadAdmin() {
   try {
@@ -396,7 +416,8 @@ async function loadAdmin() {
     ]);
     catalog = cat;
     hidden = new Set(vis.hidden || []);
-    objets = catalog.categories.filter(c => c.family === "Objets");
+    managed = catalog.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
+    if (migrateLegacy()) save();
     buildSidebar();
     buildMain();
     wireScroll();
@@ -412,8 +433,8 @@ function buildSidebar() {
   sidebar.innerHTML = "";
   sidebar.appendChild(label);
 
-  objets.forEach((cat, i) => {
-    const vis = cat.items.filter(item => !hidden.has(item.ref)).length;
+  managed.forEach((cat, i) => {
+    const vis = cat.items.filter(item => !isHidden(cat.id, item.ref)).length;
     const btn = document.createElement("button");
     btn.className = "sidebar-item" + (i === 0 ? " active" : "");
     btn.dataset.catId = cat.id;
@@ -444,12 +465,12 @@ function buildMain() {
   main.appendChild(statsEl);
   updateStats();
 
-  objets.forEach(cat => {
+  managed.forEach(cat => {
     const section = document.createElement("div");
     section.className = "cat-section";
     section.id = "sec-" + cat.id;
 
-    const vis = cat.items.filter(i => !hidden.has(i.ref)).length;
+    const vis = cat.items.filter(i => !isHidden(cat.id, i.ref)).length;
     const head = document.createElement("div");
     head.className = "cat-head";
     head.id = "head-" + cat.id;
@@ -465,9 +486,9 @@ function buildMain() {
     const grid = document.createElement("div");
     grid.className = "admin-grid";
     cat.items.forEach(item => {
-      const isHidden = hidden.has(item.ref);
+      const off = isHidden(cat.id, item.ref);
       const card = document.createElement("div");
-      card.className = "item-card" + (isHidden ? " hidden-item" : "");
+      card.className = "item-card" + (off ? " hidden-item" : "");
       card.dataset.ref = item.ref;
       card.innerHTML = `
         <img class="item-img" src="${THUMB}${item.thumb || item.img.replace(/\.png$/, '.webp')}" alt="${esc(item.ref)}" loading="lazy">
@@ -494,9 +515,9 @@ function buildMain() {
 /* ── scroll spy ── */
 function wireScroll() {
   const main = document.getElementById("adminMain");
-  const sections = objets.map(cat => document.getElementById("sec-" + cat.id)).filter(Boolean);
+  const sections = managed.map(cat => document.getElementById("sec-" + cat.id)).filter(Boolean);
   main.addEventListener("scroll", () => {
-    let current = objets[0]?.id;
+    let current = managed[0]?.id;
     for (const sec of sections) {
       if (sec.offsetTop - main.scrollTop <= 60) current = sec.id.replace("sec-", "");
     }
@@ -506,20 +527,25 @@ function wireScroll() {
 
 /* ── toggle ── */
 function toggleItem(ref, card, cat) {
-  if (hidden.has(ref)) { hidden.delete(ref); card.classList.remove("hidden-item"); }
-  else { hidden.add(ref); card.classList.add("hidden-item"); }
+  const k = visKey(cat.id, ref);
+  if (hidden.has(k)) { hidden.delete(k); card.classList.remove("hidden-item"); }
+  else { hidden.add(k); card.classList.add("hidden-item"); }
   updateCatCount(cat);
   updateStats();
   scheduleSave();
 }
 
 function bulkToggle(action, cat, section) {
+  // Garde-fou : « Tout masquer » retire toute une catégorie de la vitrine.
+  if (action === "none" && !confirm(
+    `Masquer les ${cat.items.length} designs de « ${cat.title} » ?\n\n` +
+    `Ils resteront visibles dans les autres catégories.`)) return;
   cat.items.forEach(item => {
-    if (action === "all") hidden.delete(item.ref);
-    else hidden.add(item.ref);
+    if (action === "all") hidden.delete(visKey(cat.id, item.ref));
+    else hidden.add(visKey(cat.id, item.ref));
   });
   section.querySelectorAll(".item-card").forEach(card => {
-    card.classList.toggle("hidden-item", hidden.has(card.dataset.ref));
+    card.classList.toggle("hidden-item", isHidden(cat.id, card.dataset.ref));
   });
   updateCatCount(cat);
   updateStats();
@@ -527,7 +553,7 @@ function bulkToggle(action, cat, section) {
 }
 
 function updateCatCount(cat) {
-  const vis = cat.items.filter(i => !hidden.has(i.ref)).length;
+  const vis = cat.items.filter(i => !isHidden(cat.id, i.ref)).length;
   const cn = document.getElementById("cn-" + cat.id);
   if (cn) cn.textContent = `${vis}/${cat.items.length} visibles`;
   const sn = document.getElementById("sn-" + cat.id);
@@ -535,8 +561,9 @@ function updateCatCount(cat) {
 }
 
 function updateStats() {
-  const total = objets.reduce((s, c) => s + c.items.length, 0);
-  const hiddenCount = [...hidden].filter(ref => objets.some(c => c.items.some(i => i.ref === ref))).length;
+  const total = managed.reduce((s, c) => s + c.items.length, 0);
+  const hiddenCount = managed.reduce(
+    (s, c) => s + c.items.filter(i => isHidden(c.id, i.ref)).length, 0);
   const vis = total - hiddenCount;
   const el = document.getElementById("globalStats");
   if (el) el.innerHTML = `<strong>${vis}</strong> logo${vis !== 1 ? 's' : ''} visibles · <strong>${hiddenCount}</strong> masqué${hiddenCount !== 1 ? 's' : ''} · ${total} total`;
@@ -679,10 +706,10 @@ async function handlePdf(file) {
 
 function buildCatCheckboxes() {
   if (!catalog) return;
-  const objets = catalog.categories.filter(c => c.family === "Objets");
+  const cats = catalog.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
   const container = document.getElementById("upCats");
   container.innerHTML = "";
-  objets.forEach(cat => {
+  cats.forEach(cat => {
     const label = document.createElement("label");
     label.className = "up-cat-item";
     label.innerHTML = `
@@ -730,7 +757,8 @@ document.getElementById("upSubmit").addEventListener("click", async () => {
     ]);
     catalog = newCat;
     hidden = new Set(newVis.hidden || []);
-    objets = catalog.categories.filter(c => c.family === "Objets");
+    managed = catalog.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
+    migrateLegacy();
     buildSidebar();
     buildMain();
     wireScroll();

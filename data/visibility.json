@@ -1,8 +1,25 @@
 {
   "hidden": [
-    "ASS-AVION-01",
-    "AVI-04-SXM",
-    "AVI-02 GRAND CASE",
-    "ASS-BATEAU-01"
+    "logos-monochromes::ASS-AVION-01",
+    "dessous-de-plat::ASS-AVION-01",
+    "dessous-de-verre::ASS-AVION-01",
+    "porte-cles::ASS-AVION-01",
+    "tasses-ceramique::ASS-AVION-01",
+    "logos-monochromes::AVI-04-SXM",
+    "dessous-de-plat::AVI-04-SXM",
+    "dessous-de-verre::AVI-04-SXM",
+    "magnet-acrylique::AVI-04-SXM",
+    "porte-cles::AVI-04-SXM",
+    "tasses-ceramique::AVI-04-SXM",
+    "logos-monochromes::AVI-02 GRAND CASE",
+    "dessous-de-plat::AVI-02 GRAND CASE",
+    "dessous-de-verre::AVI-02 GRAND CASE",
+    "porte-cles::AVI-02 GRAND CASE",
+    "tasses-ceramique::AVI-02 GRAND CASE",
+    "logos-monochromes::ASS-BATEAU-01",
+    "dessous-de-plat::ASS-BATEAU-01",
+    "dessous-de-verre::ASS-BATEAU-01",
+    "porte-cles::ASS-BATEAU-01",
+    "tasses-ceramique::ASS-BATEAU-01"
   ]
 }
