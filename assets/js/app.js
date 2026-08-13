@@ -18,7 +18,10 @@ let lbList = [];        // sous-ensemble courant pour prev/next
 let lbIndex = 0;
 const visibleCats = () => DATA.categories.filter(c => !HIDDEN_FAMILIES.has(c.family));
 
-let HIDDEN = new Set(); // refs masquées par l'admin
+// Visibilité : clés « catId::ref » (masquage d'un design DANS une catégorie).
+// Une réf nue est l'ancien format : elle masque le design dans tout le catalogue.
+let HIDDEN = new Set();
+const isHidden = (catId, ref) => HIDDEN.has(ref) || HIDDEN.has(catId + "::" + ref);
 
 /* ─────────── service worker (offline + chargement instantané) ─────────── */
 if ("serviceWorker" in navigator) {
@@ -46,7 +49,7 @@ async function init(){
   // filtrer les items masqués dans chaque catégorie
   DATA.categories = DATA.categories.map(c => ({
     ...c,
-    items: c.items.filter(i => !HIDDEN.has(i.ref)),
+    items: c.items.filter(i => !isHidden(c.id, i.ref)),
   }));
   flat = visibleCats().flatMap(c => c.items.map(i => ({ ...i, cat: c.title, family: c.family })));
   buildMarquee();

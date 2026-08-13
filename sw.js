@@ -2,7 +2,7 @@
    OLDA · Service Worker — offline + chargement instantané
    Zéro dépendance. Bump CACHE pour invalider à chaque déploiement.
    ════════════════════════════════════════════════════ */
-const CACHE = "olda-v4";
+const CACHE = "olda-v5";
 
 // Coquille de l'app pré-cachée à l'installation (tolérant aux 404).
 const SHELL = [
