@@ -68,8 +68,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   background: var(--surface); border-bottom: 1px solid var(--border);
   padding: 0 20px; display: flex; align-items: center; gap: 14px;
 }
-.brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; }
-.brand-sub { font-size: 11px; font-weight: 400; color: var(--muted); display: block; letter-spacing: .05em; text-transform: uppercase; }
 .spacer { flex: 1; }
 .save-status { font-size: 13px; color: var(--muted); transition: color .2s; }
 .save-status.saving { color: var(--accent); }
@@ -271,6 +269,34 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .item-card:not(.hidden-item) .item-check svg { display: block; }
 
 .loading { text-align: center; padding: 80px 24px; color: var(--muted); font-size: 15px; }
+/* LA BARRE OLDA, LE FIL D'ARIANE (21/11/2026) — la même que BAT Studio, le
+   Logo maker et le planning : « ‹ Dashboard », OLDA + l'appli en gris, un
+   filet, le fil « maillon › écran en cours » (l'écran en gras). Copiée telle quelle dans chaque appli.
+   `.ob-barre` : la barre entière ; `.ob-fil` : le même fil posé dans la barre
+   que l'appli a déjà (Pressage, Tarif Laser). */
+:is(.ob-barre,.ob-fil){--ob-fond:#fff;--ob-encre:#1f2328;--ob-encre-2:#6b7075;--ob-encre-3:#a3a7ab;--ob-filet:#e4e6e9;--ob-filet-fort:#cdd0d4;--ob-zone:rgba(31,35,40,.06);
+  font:400 14px/1.25 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;letter-spacing:normal;-webkit-font-smoothing:antialiased}
+.ob-fil{display:flex;align-items:center;gap:14px;min-width:0;color:var(--ob-encre)}
+.ob-barre{position:relative;z-index:40;box-sizing:border-box;height:calc(60px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;margin:0;
+  padding:env(safe-area-inset-top) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+  background:var(--ob-fond);border-bottom:1px solid var(--ob-filet);color:var(--ob-encre)}
+[data-theme="dark"] :is(.ob-barre,.ob-fil){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
+:is(.ob-barre,.ob-fil) .retour-dash{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:2px;width:auto;min-height:44px;margin:0;padding:0 14px 0 8px;border:1px solid var(--ob-filet-fort);border-radius:999px;background:var(--ob-zone);color:var(--ob-encre);font:inherit;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap}
+:is(.ob-barre,.ob-fil) .retour-dash svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:is(.ob-barre,.ob-fil) .retour-dash span{display:inline}
+:is(.ob-barre,.ob-fil) .retour-dash:hover{border-color:var(--ob-encre-3)}
+:is(.ob-barre,.ob-fil) .retour-dash:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
+.ob-marque{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.ob-marque b{font-weight:600;color:var(--ob-encre)}
+.ob-marque span{color:var(--ob-encre-2)}
+.ob-filet{flex:none;width:1px;height:22px;background:var(--ob-filet)}
+.ob-titre{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px}
+.ob-titre b{min-width:0;font-size:16px;font-weight:600;color:var(--ob-encre);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ob-titre span{min-width:0;font-size:12px;color:var(--ob-encre-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-titre a{flex:none;display:inline-flex;align-items:center;min-height:44px;font-size:14px;color:var(--ob-encre-2);text-decoration:none;white-space:nowrap}
+.ob-titre a:hover{color:var(--ob-encre);text-decoration:underline;text-underline-offset:3px}
+.ob-titre a:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff;border-radius:6px}
+.ob-titre .ob-sep{flex:none;font-size:14px;color:var(--ob-encre-3)}
 </style>
 </head>
 <body>
@@ -292,10 +318,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <!-- APP -->
 <div id="app">
   <header class="app-header">
-    <div class="brand">
-      <div class="mark">O</div>
-      <span>OLDA <span class="brand-sub">Admin · Visibilité</span></span>
-    </div>
+    <div class="ob-fil"><a class="retour-dash" id="retour-dash" href="https://dockbearolda.github.io/" aria-label="Retour au Dashboard" title="Retour au Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Dashboard</span></a><script>try{if(top!==self)document.getElementById("retour-dash").remove()}catch(e){}</script><div class="ob-marque"><b>OLDA</b><span>Design</span></div><span class="ob-filet" aria-hidden="true"></span><div class="ob-titre"><a href="/">Catalogue</a><span class="ob-sep" aria-hidden="true">›</span><b>Visibilité</b></div></div>
     <div class="spacer"></div>
     <span class="save-status" id="saveStatus"></span>
     <button class="add-btn" id="openUpload">

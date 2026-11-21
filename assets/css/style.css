@@ -112,10 +112,6 @@ img{ display:block; max-width:100%; }
   box-shadow:var(--shadow-sm); flex:none;
 }
 /* logo glass (SVG) en haut à gauche — la tuile + ombre sont dans le SVG */
-.nav__logo{ width:44px; height:44px; flex:none; display:block; margin:-2px 0; }
-.nav__brand{ display:flex; align-items:center; gap:11px; }
-.nav__name{ display:flex; flex-direction:column; line-height:1; font-family:var(--ff-display); font-size:19px; font-weight:600; letter-spacing:.02em; }
-.nav__sub{ font-family:var(--ff-body); font-size:10px; font-weight:500; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-mute); margin-top:4px; }
 /* sur mobile, le logo glass EST le bouton menu (incrusté avec le burger) */
 .nav__toggle{
   display:none; appearance:none; border:0; cursor:pointer; flex:none;
@@ -330,7 +326,6 @@ img{ display:block; max-width:100%; }
   /* logo-burger collé au bord gauche (annule le padding gauche du nav) */
   .nav__toggle{ display:grid; margin-left:calc(2px - var(--gut)); }
   /* le logo est déjà dans le bouton menu → on évite le doublon dans la marque */
-  .nav__brand .nav__logo{ display:none; }
   .shell{ grid-template-columns:1fr; }
   .sidebar{
     position:fixed; top:0; left:0; z-index:200;
@@ -350,7 +345,6 @@ img{ display:block; max-width:100%; }
 
 @media (max-width:720px){
   .nav{ flex-wrap:wrap; gap:10px 12px; }
-  .nav__name{ font-size:17px; }
   .nav .nav__search{ order:3; flex:1 1 100%; min-width:0; margin-left:0; }
   .lb__nav{ width:48px; height:48px; }
   .lb__meta{ padding-bottom:calc(24px + env(safe-area-inset-bottom)); }
@@ -399,8 +393,32 @@ button, a, input, .card, .side__item, .seg-btn{ touch-action:manipulation; }
 }
 
 /* RETOUR AU DASHBOARD (20/11/2026) : le même bouton dans toutes les applis OLDA. */
-.retour-dash{display:inline-flex;align-items:center;gap:2px;min-height:40px;padding:0 12px 0 6px;border:1px solid rgba(127,127,127,.35);border-radius:999px;background:rgba(127,127,127,.08);color:inherit;text-decoration:none;font-size:14px;font-weight:600;line-height:1;flex:0 0 auto;white-space:nowrap;-webkit-tap-highlight-color:transparent}
-.retour-dash svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.retour-dash:hover{background:rgba(127,127,127,.16)}
-.retour-dash:focus-visible{outline:2px solid currentColor;outline-offset:2px}
-@media (max-width:640px){.retour-dash span{display:none}.retour-dash{padding:0;width:40px;justify-content:center}}
+
+/* LA BARRE OLDA, LE FIL D'ARIANE (21/11/2026) — la même que BAT Studio, le
+   Logo maker et le planning : « ‹ Dashboard », OLDA + l'appli en gris, un
+   filet, le fil « maillon › écran en cours » (l'écran en gras). Copiée telle quelle dans chaque appli.
+   `.ob-barre` : la barre entière ; `.ob-fil` : le même fil posé dans la barre
+   que l'appli a déjà (Pressage, Tarif Laser). */
+:is(.ob-barre,.ob-fil){--ob-fond:#fff;--ob-encre:#1f2328;--ob-encre-2:#6b7075;--ob-encre-3:#a3a7ab;--ob-filet:#e4e6e9;--ob-filet-fort:#cdd0d4;--ob-zone:rgba(31,35,40,.06);
+  font:400 14px/1.25 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;letter-spacing:normal;-webkit-font-smoothing:antialiased}
+.ob-fil{display:flex;align-items:center;gap:14px;min-width:0;color:var(--ob-encre)}
+.ob-barre{position:relative;z-index:40;box-sizing:border-box;height:calc(60px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;margin:0;
+  padding:env(safe-area-inset-top) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
+  background:var(--ob-fond);border-bottom:1px solid var(--ob-filet);color:var(--ob-encre)}
+[data-theme="dark"] :is(.ob-barre,.ob-fil){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
+:is(.ob-barre,.ob-fil) .retour-dash{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:2px;width:auto;min-height:44px;margin:0;padding:0 14px 0 8px;border:1px solid var(--ob-filet-fort);border-radius:999px;background:var(--ob-zone);color:var(--ob-encre);font:inherit;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap}
+:is(.ob-barre,.ob-fil) .retour-dash svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+:is(.ob-barre,.ob-fil) .retour-dash span{display:inline}
+:is(.ob-barre,.ob-fil) .retour-dash:hover{border-color:var(--ob-encre-3)}
+:is(.ob-barre,.ob-fil) .retour-dash:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
+.ob-marque{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.ob-marque b{font-weight:600;color:var(--ob-encre)}
+.ob-marque span{color:var(--ob-encre-2)}
+.ob-filet{flex:none;width:1px;height:22px;background:var(--ob-filet)}
+.ob-titre{flex:1;min-width:0;display:flex;align-items:baseline;gap:10px}
+.ob-titre b{min-width:0;font-size:16px;font-weight:600;color:var(--ob-encre);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ob-titre span{min-width:0;font-size:12px;color:var(--ob-encre-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ob-titre a{flex:none;display:inline-flex;align-items:center;min-height:44px;font-size:14px;color:var(--ob-encre-2);text-decoration:none;white-space:nowrap}
+.ob-titre a:hover{color:var(--ob-encre);text-decoration:underline;text-underline-offset:3px}
+.ob-titre a:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff;border-radius:6px}
+.ob-titre .ob-sep{flex:none;font-size:14px;color:var(--ob-encre-3)}
