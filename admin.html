@@ -274,18 +274,13 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
    filet, le fil « maillon › écran en cours » (l'écran en gras). Copiée telle quelle dans chaque appli.
    `.ob-barre` : la barre entière ; `.ob-fil` : le même fil posé dans la barre
    que l'appli a déjà (Pressage, Tarif Laser). */
-:is(.ob-barre,.ob-fil){--ob-fond:#fff;--ob-encre:#1f2328;--ob-encre-2:#6b7075;--ob-encre-3:#a3a7ab;--ob-filet:#e4e6e9;--ob-filet-fort:#cdd0d4;--ob-zone:rgba(31,35,40,.06);
+:is(.ob-barre,.ob-fil,.ob-bout){--ob-fond:#fff;--ob-encre:#1f2328;--ob-encre-2:#6b7075;--ob-encre-3:#a3a7ab;--ob-filet:#e4e6e9;--ob-filet-fort:#cdd0d4;--ob-zone:rgba(31,35,40,.06);
   font:400 14px/1.25 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;letter-spacing:normal;-webkit-font-smoothing:antialiased}
 .ob-fil{display:flex;align-items:center;gap:14px;min-width:0;color:var(--ob-encre)}
 .ob-barre{position:relative;z-index:40;box-sizing:border-box;height:calc(60px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;margin:0;
   padding:env(safe-area-inset-top) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
   background:var(--ob-fond);border-bottom:1px solid var(--ob-filet);color:var(--ob-encre)}
-[data-theme="dark"] :is(.ob-barre,.ob-fil){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
-:is(.ob-barre,.ob-fil) .retour-dash{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:2px;width:auto;min-height:44px;margin:0;padding:0 14px 0 8px;border:1px solid var(--ob-filet-fort);border-radius:999px;background:var(--ob-zone);color:var(--ob-encre);font:inherit;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap}
-:is(.ob-barre,.ob-fil) .retour-dash svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-:is(.ob-barre,.ob-fil) .retour-dash span{display:inline}
-:is(.ob-barre,.ob-fil) .retour-dash:hover{border-color:var(--ob-encre-3)}
-:is(.ob-barre,.ob-fil) .retour-dash:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
+[data-theme="dark"] :is(.ob-barre,.ob-fil,.ob-bout){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
 .ob-marque{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
 .ob-marque b{font-weight:600;color:var(--ob-encre)}
 .ob-marque span{color:var(--ob-encre-2)}
@@ -297,6 +292,20 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .ob-titre a:hover{color:var(--ob-encre);text-decoration:underline;text-underline-offset:3px}
 .ob-titre a:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff;border-radius:6px}
 .ob-titre .ob-sep{flex:none;font-size:14px;color:var(--ob-encre-3)}
+/* LE BOUT DE LA BARRE (21/11/2026) : toujours tout à droite, toujours dans cet
+   ordre — la roue des réglages de l'appli, puis la double flèche « en grand »
+   (barre.js du Dashboard). */
+.ob-bout{flex:none;margin-left:auto;display:flex;align-items:center;gap:2px}
+.ob-bout .ob-outil{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;margin:0;padding:0;border:0;border-radius:10px;background:transparent;color:var(--ob-encre);cursor:pointer;text-decoration:none}
+.ob-bout .ob-outil svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ob-bout .ob-outil:hover,.ob-bout .ob-outil[aria-current="page"],.ob-bout .ob-outil[aria-pressed="true"]{background:var(--ob-zone)}
+.ob-bout .ob-outil:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
+.ob-bout [hidden]{display:none!important}
+/* « OLDA » mène au Dashboard (21/11/2026 : la pastille « ‹ Dashboard » est partie,
+   le fil d'Ariane et les onglets du Dashboard suffisent). Dans un cadre, il ne mène nulle part. */
+.ob-marque .ob-olda{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none}
+.ob-marque a.ob-olda:hover b{text-decoration:underline;text-underline-offset:3px}
+.ob-marque .ob-olda:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff;border-radius:6px}
 </style>
 </head>
 <body>
@@ -318,13 +327,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <!-- APP -->
 <div id="app">
   <header class="app-header">
-    <div class="ob-fil"><a class="retour-dash" id="retour-dash" href="https://dockbearolda.github.io/" aria-label="Retour au Dashboard" title="Retour au Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Dashboard</span></a><script>try{if(top!==self)document.getElementById("retour-dash").remove()}catch(e){}</script><div class="ob-marque"><b>OLDA</b><span>Design</span></div><span class="ob-filet" aria-hidden="true"></span><div class="ob-titre"><a href="/">Catalogue</a><span class="ob-sep" aria-hidden="true">›</span><b>Visibilité</b></div></div>
+    <div class="ob-fil"><div class="ob-marque"><a class="ob-olda" id="ob-olda" href="https://dockbearolda.github.io/" title="Retour au Dashboard"><b>OLDA</b></a><span>Design</span></div><script>try{if(top!==self)document.getElementById("ob-olda").removeAttribute("href")}catch(e){}</script><span class="ob-filet" aria-hidden="true"></span><div class="ob-titre"><a href="/">Catalogue</a><span class="ob-sep" aria-hidden="true">›</span><b>Visibilité</b></div></div>
     <div class="spacer"></div>
     <span class="save-status" id="saveStatus"></span>
     <button class="add-btn" id="openUpload">
       <svg viewBox="0 0 20 20" width="15" height="15" fill="none"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v8M6 10h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       Ajouter un logo
     </button>
+    <div class="ob-bout"><a class="ob-outil ob-reglages" href="/admin" aria-current="page" aria-label="Réglages" title="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></a><button type="button" class="ob-outil ob-grand" aria-label="Agrandir" title="Agrandir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg></button></div>
   </header>
 
   <!-- UPLOAD PANEL -->
@@ -799,5 +809,6 @@ function setUpMsg(text, type) {
   el.style.color = type === "error" ? "var(--red)" : type === "ok" ? "var(--green)" : "var(--muted)";
 }
 </script>
+<script src="https://dockbearolda.github.io/barre.js" defer></script>
 </body>
 </html>
