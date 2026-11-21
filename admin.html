@@ -281,11 +281,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
   padding:env(safe-area-inset-top) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
   background:var(--ob-fond);border-bottom:1px solid var(--ob-filet);color:var(--ob-encre)}
 [data-theme="dark"] :is(.ob-barre,.ob-fil,.ob-bout){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
-:is(.ob-barre,.ob-fil,.ob-bout) .retour-dash{flex:none;box-sizing:border-box;display:inline-flex;align-items:center;gap:2px;width:auto;min-height:44px;margin:0;padding:0 14px 0 8px;border:1px solid var(--ob-filet-fort);border-radius:999px;background:var(--ob-zone);color:var(--ob-encre);font:inherit;font-weight:600;line-height:1;text-decoration:none;white-space:nowrap}
-:is(.ob-barre,.ob-fil,.ob-bout) .retour-dash svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-:is(.ob-barre,.ob-fil,.ob-bout) .retour-dash span{display:inline}
-:is(.ob-barre,.ob-fil,.ob-bout) .retour-dash:hover{border-color:var(--ob-encre-3)}
-:is(.ob-barre,.ob-fil,.ob-bout) .retour-dash:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
 .ob-marque{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
 .ob-marque b{font-weight:600;color:var(--ob-encre)}
 .ob-marque span{color:var(--ob-encre-2)}
@@ -306,6 +301,11 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .ob-bout .ob-outil:hover,.ob-bout .ob-outil[aria-current="page"],.ob-bout .ob-outil[aria-pressed="true"]{background:var(--ob-zone)}
 .ob-bout .ob-outil:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff}
 .ob-bout [hidden]{display:none!important}
+/* « OLDA » mène au Dashboard (21/11/2026 : la pastille « ‹ Dashboard » est partie,
+   le fil d'Ariane et les onglets du Dashboard suffisent). Dans un cadre, il ne mène nulle part. */
+.ob-marque .ob-olda{display:inline-flex;align-items:center;min-height:44px;color:inherit;text-decoration:none}
+.ob-marque a.ob-olda:hover b{text-decoration:underline;text-underline-offset:3px}
+.ob-marque .ob-olda:focus-visible{outline:none;box-shadow:0 0 0 2px #6f95ff;border-radius:6px}
 </style>
 </head>
 <body>
@@ -327,7 +327,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 <!-- APP -->
 <div id="app">
   <header class="app-header">
-    <div class="ob-fil"><a class="retour-dash" id="retour-dash" href="https://dockbearolda.github.io/" aria-label="Retour au Dashboard" title="Retour au Dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg><span>Dashboard</span></a><script>try{if(top!==self)document.getElementById("retour-dash").remove()}catch(e){}</script><div class="ob-marque"><b>OLDA</b><span>Design</span></div><span class="ob-filet" aria-hidden="true"></span><div class="ob-titre"><a href="/">Catalogue</a><span class="ob-sep" aria-hidden="true">›</span><b>Visibilité</b></div></div>
+    <div class="ob-fil"><div class="ob-marque"><a class="ob-olda" id="ob-olda" href="https://dockbearolda.github.io/" title="Retour au Dashboard"><b>OLDA</b></a><span>Design</span></div><script>try{if(top!==self)document.getElementById("ob-olda").removeAttribute("href")}catch(e){}</script><span class="ob-filet" aria-hidden="true"></span><div class="ob-titre"><a href="/">Catalogue</a><span class="ob-sep" aria-hidden="true">›</span><b>Visibilité</b></div></div>
     <div class="spacer"></div>
     <span class="save-status" id="saveStatus"></span>
     <button class="add-btn" id="openUpload">
