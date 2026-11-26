@@ -4,9 +4,11 @@
   "private": true,
   "description": "OLDA — Catalogue Design 2025 : catalogue virtuel des logos Saint-Martin",
   "scripts": {
-    "start": "node server.js"
+    "start": "node scripts/build-cf.mjs && npx wrangler dev",
+    "cf:build": "node scripts/build-cf.mjs",
+    "cf:deploy": "node scripts/build-cf.mjs && npx wrangler deploy"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   }
 }

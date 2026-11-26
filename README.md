@@ -10,12 +10,18 @@ révélations au scroll, recherche live, lightbox avec copie de référence.
 ## Lancer en local
 
 ```bash
-python3 -m http.server 8753
-# puis ouvrir http://127.0.0.1:8753
+npm start        # build + wrangler dev (R2 simulé sur le disque)
 ```
 
-(Un simple serveur statique suffit — `npx serve`, nginx, ou n'importe quel hébergeur
-de fichiers statiques : GitHub Pages, Netlify, Vercel, Railway…)
+## Hébergement (Cloudflare)
+
+En ligne : https://design-olda.dockbear.workers.dev (Worker `design-olda`).
+
+- Pages, CSS, JS, polices et logos d'origine : fichiers statiques (`dist-cf/`, préparé par `npm run cf:build`, sans `assets/_masters`).
+- Ce que l'admin change (`data/catalog.json`, `data/visibility.json`, logos ajoutés) : bucket R2 `design-olda-data`,
+  même chemin que l'URL. Tant qu'un fichier n'y est pas, c'est celui du dépôt qui est servi.
+- `worker/index.js` : l'API admin (`/api/login`, `/api/upload`, `/api/visibility`), code dans le secret `ADMIN_CODE`.
+- Déployer : `npm run cf:deploy` (merger sur `main` ne déploie rien).
 
 ## Structure
 
