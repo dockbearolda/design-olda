@@ -405,7 +405,6 @@ button, a, input, .card, .side__item, .seg-btn{ touch-action:manipulation; }
 .ob-barre{position:relative;z-index:40;box-sizing:border-box;height:calc(60px + env(safe-area-inset-top));display:flex;align-items:center;gap:14px;margin:0;
   padding:env(safe-area-inset-top) calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left));
   background:var(--ob-fond);border-bottom:1px solid var(--ob-filet);color:var(--ob-encre)}
-[data-theme="dark"] :is(.ob-barre,.ob-fil,.ob-bout){--ob-fond:#0e0f11;--ob-encre:#f4f4f2;--ob-encre-2:#a2a2a0;--ob-encre-3:#75757a;--ob-filet:#26272b;--ob-filet-fort:#3a3b41;--ob-zone:#24252a}
 .ob-marque{flex:none;display:flex;align-items:baseline;gap:6px;white-space:nowrap}
 .ob-marque b{font-weight:600;color:var(--ob-encre)}
 .ob-marque span{color:var(--ob-encre-2)}
