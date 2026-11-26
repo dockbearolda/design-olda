@@ -8,7 +8,11 @@
 const CODE_SECOURS = 'olda28280';
 const MUTABLES = ['/data/', '/assets/logos/', '/assets/thumbs/'];
 const TYPES = { json: 'application/json; charset=utf-8', png: 'image/png', webp: 'image/webp', svg: 'image/svg+xml' };
-const SECURITE = { 'X-Content-Type-Options': 'nosniff', 'X-Frame-Options': 'SAMEORIGIN', 'Referrer-Policy': 'strict-origin-when-cross-origin' };
+// Affichable en onglet dans le Dashboard (dockbearolda.github.io), nulle part ailleurs.
+const SECURITE = {
+  'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "frame-ancestors 'self' https://dockbearolda.github.io http://localhost:* http://127.0.0.1:*",
+};
 
 const texte = (status, corps) => new Response(corps, { status, headers: { 'Content-Type': 'text/plain; charset=utf-8', ...SECURITE } });
 const json = (obj) => new Response(JSON.stringify(obj), { headers: { 'Content-Type': TYPES.json, ...SECURITE } });
